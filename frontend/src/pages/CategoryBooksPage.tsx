@@ -3,6 +3,30 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
+const categoryMap: Record<string, string> = {
+  'adventure-stories': 'Adventure stories',
+  classics: 'Classics',
+  crime: 'Crime',
+  'fairy-tales': 'Fairy tales',
+  fantasy: 'Fantasy',
+  'historical-fiction': 'Historical fiction',
+  horror: 'Horror',
+  'humour-and-satire': 'Humour and satire',
+  'literary-fiction': 'Literary fiction',
+  mystery: 'Mystery',
+  poetry: 'Poetry',
+  plays: 'Plays',
+  romance: 'Romance',
+  'science-fiction': 'Science fiction',
+  'short-stories': 'Short stories',
+  thrillers: 'Thrillers',
+  war: 'War',
+  'womens-fiction': 'Women’s fiction',
+  'young-adult': 'Young adult',
+  'autobiography-and-memoir': 'Autobiography and memoir',
+  biography: 'Biography',
+}
+
 const books = [
   {
     title: 'The Lost Expedition',
@@ -132,110 +156,79 @@ const books = [
   },
 ]
 
-export function BookDetailsPage() {
-  const { bookId } = useParams()
-  const decodedTitle = bookId ? decodeURIComponent(bookId) : ''
-  const book = books.find((b) => b.title === decodedTitle)
-  useDocumentTitle(`${book?.title || 'Book Details'} | SWI Frontend`)
+export function CategoryBooksPage() {
+  const { category } = useParams<{ category: string }>()
+  const categoryTitle = category ? categoryMap[category] : undefined
 
-  if (!book) {
-    return (
-      <div className="space-y-6">
-        <PageHero
-          eyebrow="Book Not Found"
-          title="Book not found"
-          description="The requested book could not be found."
-        />
-      </div>
-    )
-  }
+  useDocumentTitle(categoryTitle ? `${categoryTitle} | SWI Frontend` : 'Category | SWI Frontend')
+
+  const filteredBooks = categoryTitle
+    ? books.filter((book) => book.category === categoryTitle)
+    : []
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHero
-        eyebrow="Book Details"
-        title={book.title}
-        description={`By ${book.author} • ${book.category}`}
+        eyebrow="Category"
+        title={categoryTitle ?? 'Unknown category'}
+        description={
+          categoryTitle
+            ? `Explore books that are marked under ${categoryTitle}.`
+            : 'The requested category was not found.'
+        }
       >
-        <div className="flex flex-wrap gap-3">
-          <Link
-            to="/catalog"
-            className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-          >
-            Back to catalog
-          </Link>
-          <Link
-            to="/cart"
-            className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-          >
-            Add to cart
-          </Link>
-        </div>
+        <Link
+          to="/catalog"
+          className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+        >
+          Back to catalog
+        </Link>
       </PageHero>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard title="Book Information">
-          <div className="space-y-4">
-            <div className="flex gap-6">
-              <img
-                src={book.coverUrl}
-                alt={`${book.title} cover`}
-                className="h-48 w-32 rounded-lg object-cover shadow-sm"
-              />
-              <div className="flex-1 space-y-2">
-                <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{book.category}</p>
-                <h2 className="text-2xl font-semibold text-slate-950">{book.title}</h2>
-                <p className="text-lg text-slate-600">by {book.author}</p>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <span key={i} className={i < Math.floor(book.rating) ? 'text-yellow-400' : 'text-gray-300'}>
-                      ★
-                    </span>
-                  ))}
-                  <span className="ml-2 text-sm text-slate-500">({book.rating})</span>
+      <SectionCard eyebrow="Books" title={categoryTitle ?? 'No category selected'}>
+        {filteredBooks.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredBooks.map((book) => (
+              <Link
+                key={book.title}
+                to={`/books/${encodeURIComponent(book.title)}`}
+                className="block rounded-3xl border border-slate-200 bg-slate-50 pl-14 pr-6 py-5 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50"
+              >
+                <div className="flex flex-row-reverse gap-4 items-center">
+                  <img
+                    src={book.coverUrl}
+                    alt={`${book.title} cover`}
+                    className="h-32 w-24 rounded-lg object-cover shadow-sm"
+                  />
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{book.category}</p>
+                    <h2 className="text-lg font-semibold text-slate-950">{book.title}</h2>
+                    <p className="text-sm text-slate-600">{book.author}</p>
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <span key={i} className={i < Math.floor(book.rating) ? 'text-yellow-400' : 'text-gray-300'}>
+                          ★
+                        </span>
+                      ))}
+                      <span className="ml-0.5 text-xs text-slate-500">({book.rating})</span>
+                    </div>
+                    <div className="flex flex-col gap-1.5 text-sm text-slate-500 pt-1">
+                      <span>{book.pages} pages</span>
+                      <span>{book.price} Kč</span>
+                      <span>Age {book.age}+</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </Link>
+            ))}
           </div>
-        </SectionCard>
-
-        <SectionCard title="Details">
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-slate-600">Price:</span>
-              <span className="font-semibold">{book.price} Kč</span>
-            </div>
-            {book.discountPercent > 0 && (
-              <div className="flex justify-between">
-                <span className="text-slate-600">Original Price:</span>
-                <span className="text-slate-500 line-through">{book.originalPrice} Kč</span>
-              </div>
-            )}
-            {book.discountPercent > 0 && (
-              <div className="flex justify-between">
-                <span className="text-slate-600">Discount:</span>
-                <span className="text-red-600 font-semibold">-{book.discountPercent}%</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-slate-600">Pages:</span>
-              <span>{book.pages}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Format:</span>
-              <span>{book.format}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Age:</span>
-              <span>{book.age}+</span>
-            </div>
-            <div className="pt-3 border-t border-slate-200">
-              <span className="text-slate-600">Description:</span>
-              <p className="mt-2 text-sm text-slate-600 leading-relaxed">{book.description}</p>
-            </div>
+        ) : (
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600">
+            <p className="text-base font-medium">No books are currently marked for this category.</p>
+            <p className="mt-3 text-sm">Try returning to the catalog to choose another book type.</p>
           </div>
-        </SectionCard>
-      </div>
+        )}
+      </SectionCard>
     </div>
   )
 }
