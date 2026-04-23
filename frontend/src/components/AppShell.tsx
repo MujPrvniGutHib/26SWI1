@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { cn } from '../utils/cn'
 
 const navigation = [
@@ -11,7 +11,15 @@ const navigation = [
 
 export function AppShell() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [isSignedIn, setIsSignedIn] = useState(false)
+  const isSignedIn = false
+  const navigate = useNavigate()
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/catalog?q=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#cffafe,_#f8fafc_45%,_#e2e8f0)] text-slate-900">
@@ -26,17 +34,19 @@ export function AppShell() {
             </h1>
           </div>
           <div className="w-full max-w-lg lg:justify-self-center">
-            <label htmlFor="top-search" className="sr-only">
-              Search books
-            </label>
-            <input
-              id="top-search"
-              type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search books, authors or genres"
-              className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
-            />
+            <form onSubmit={handleSearch}>
+              <label htmlFor="top-search" className="sr-only">
+                Search books
+              </label>
+              <input
+                id="top-search"
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search books, authors or genres"
+                className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
+              />
+            </form>
           </div>
           <nav className="flex flex-wrap gap-2 lg:justify-self-end">
             {navigation.map((item) => (

@@ -98,12 +98,12 @@ export function SignInPage() {
           </div>
         </section>
 
-        <SectionCard eyebrow="Why Sign In" title="A cleaner customer entry point">
+        <SectionCard eyebrow="Why Sign In" title="Make your life easier">
           <div className="grid gap-3">
             {[
-              'Login and registration stay on one route for a simpler flow.',
-              'The tab layout works well on desktop and mobile.',
-              'Each form can be connected to Axios and Zustand later without changing the page structure.',
+              'Look at your orders old or active.',
+              'You don’t have to write anything in checkout.',
+              'Each month you can win a ticket for 100Kč off your order.',
             ].map((item) => (
               <div
                 key={item}
@@ -119,7 +119,7 @@ export function SignInPage() {
               to="/profile"
               className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              View profile route
+              View profile
             </Link>
             <Link
               to="/about"

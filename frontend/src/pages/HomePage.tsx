@@ -12,8 +12,8 @@ export function HomePage() {
     <div className="flex flex-col gap-6">
       <PageHero
         eyebrow="Home"
-        title="Your bookstore routes are connected"
-        description="The app now has a router-backed structure for catalog browsing, book details, checkout, authentication, and the customer profile."
+        title="Welcome at Find my Book"
+        description="Here you can find books of your dreams and nightmares. We can provide you with any book that you might be interested in. Don't be shy and jump into the magical word of books."
       >
         <div className="flex flex-wrap gap-3">
           <Link
@@ -21,12 +21,6 @@ export function HomePage() {
             className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
           >
             Open catalog
-          </Link>
-          <Link
-            to="/books/the-midnight-library"
-            className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-          >
-            View sample book
           </Link>
         </div>
       </PageHero>

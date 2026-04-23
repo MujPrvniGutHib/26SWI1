@@ -16,6 +16,7 @@ const books = [
     discountPercent: 12,
     rating: 4.5,
     coverUrl: 'https://via.placeholder.com/150x200?text=Lost+Expedition',
+    stock: 15,
   },
   {
     title: 'Moonlit Manor',
@@ -29,6 +30,7 @@ const books = [
     discountPercent: 0,
     rating: 4.2,
     coverUrl: 'https://via.placeholder.com/150x200?text=Moonlit+Manor',
+    stock: 8,
   },
   {
     title: 'Castle of Stars',
@@ -42,6 +44,7 @@ const books = [
     discountPercent: 0,
     rating: 4.8,
     coverUrl: 'https://via.placeholder.com/150x200?text=Castle+of+Stars',
+    stock: 23,
   },
   {
     title: 'The War Dispatch',
@@ -55,6 +58,7 @@ const books = [
     discountPercent: 11,
     rating: 4.0,
     coverUrl: 'https://via.placeholder.com/150x200?text=War+Dispatch',
+    stock: 5,
   },
   {
     title: 'Voices of Autumn',
@@ -68,6 +72,7 @@ const books = [
     discountPercent: 0,
     rating: 4.3,
     coverUrl: 'https://via.placeholder.com/150x200?text=Voices+of+Autumn',
+    stock: 0,
   },
   {
     title: 'A Room for Two',
@@ -81,6 +86,7 @@ const books = [
     discountPercent: 11,
     rating: 4.6,
     coverUrl: 'https://via.placeholder.com/150x200?text=Room+for+Two',
+    stock: 12,
   },
   {
     title: 'Beyond the Fog',
@@ -94,6 +100,7 @@ const books = [
     discountPercent: 0,
     rating: 3.9,
     coverUrl: 'https://via.placeholder.com/150x200?text=Beyond+the+Fog',
+    stock: 7,
   },
   {
     title: 'Czech Heroes',
@@ -107,6 +114,7 @@ const books = [
     discountPercent: 0,
     rating: 4.4,
     coverUrl: 'https://via.placeholder.com/150x200?text=Czech+Heroes',
+    stock: 3,
   },
   {
     title: 'The Memoir of Anna',
@@ -120,6 +128,7 @@ const books = [
     discountPercent: 0,
     rating: 4.1,
     coverUrl: 'https://via.placeholder.com/150x200?text=Memoir+of+Anna',
+    stock: 18,
   },
 ]
 
@@ -146,8 +155,8 @@ export function DiscountsPage() {
       <SectionCard eyebrow="Discounted Books" title="Limited time offers">
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {discountedBooks.map((book) => (
-            <div key={book.title} className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
-              <div className="flex gap-4">
+            <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
+              <Link to={`/books/${encodeURIComponent(book.title)}`} className="flex flex-1 gap-4">
                 <img
                   src={book.coverUrl}
                   alt={`${book.title} cover`}
@@ -177,6 +186,20 @@ export function DiscountsPage() {
                     <span>Age {book.age}+</span>
                   </div>
                 </div>
+              </Link>
+              <div className="mt-4">
+                {book.stock > 0 ? (
+                  <Link
+                    to="/cart"
+                    className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                  >
+                    Add to cart
+                  </Link>
+                ) : (
+                  <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
+                    Not available
+                  </span>
+                )}
               </div>
             </div>
           ))}

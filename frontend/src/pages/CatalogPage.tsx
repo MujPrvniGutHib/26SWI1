@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -147,6 +147,7 @@ const books = [
     rating: 4.5,
     coverUrl: 'https://via.placeholder.com/150x200?text=Lost+Expedition',
     description: 'Join Erik Hansen on an unforgettable journey through uncharted territories filled with danger, discovery, and wonder. A thrilling adventure that captures the spirit of exploration.',
+    stock: 15,
   },
   {
     title: 'Moonlit Manor',
@@ -161,6 +162,7 @@ const books = [
     rating: 4.2,
     coverUrl: 'https://via.placeholder.com/150x200?text=Moonlit+Manor',
     description: 'A gripping mystery set in an ancient manor where secrets hide behind every door. Sara Doyle weaves an intricate plot of suspense and surprising revelations.',
+    stock: 8,
   },
   {
     title: 'Castle of Stars',
@@ -175,6 +177,7 @@ const books = [
     rating: 4.8,
     coverUrl: 'https://via.placeholder.com/150x200?text=Castle+of+Stars',
     description: 'Explore a magical realm where a castle floats among the stars. An epic fantasy adventure filled with enchantment, heroism, and timeless magic that will captivate readers.',
+    stock: 23,
   },
   {
     title: 'The War Dispatch',
@@ -189,6 +192,7 @@ const books = [
     rating: 4.0,
     coverUrl: 'https://via.placeholder.com/150x200?text=War+Dispatch',
     description: 'A powerful narrative of courage and sacrifice during wartime. Jakub Martínek chronicles the extraordinary stories of soldiers facing impossible odds and finding hope in darkness.',
+    stock: 5,
   },
   {
     title: 'Voices of Autumn',
@@ -203,6 +207,7 @@ const books = [
     rating: 4.3,
     coverUrl: 'https://via.placeholder.com/150x200?text=Voices+of+Autumn',
     description: 'A collection of beautiful and haunting verses that capture the essence of autumn. Lena Novak\'s poetry explores themes of change, reflection, and natural beauty.',
+    stock: 0,
   },
   {
     title: 'A Room for Two',
@@ -217,6 +222,7 @@ const books = [
     rating: 4.6,
     coverUrl: 'https://via.placeholder.com/150x200?text=Room+for+Two',
     description: 'A tender romance about two souls discovering love in unexpected circumstances. Olivia Svobodová crafts an emotional journey about connection, vulnerability, and lasting devotion.',
+    stock: 12,
   },
   {
     title: 'Beyond the Fog',
@@ -231,6 +237,7 @@ const books = [
     rating: 3.9,
     coverUrl: 'https://via.placeholder.com/150x200?text=Beyond+the+Fog',
     description: 'A chilling tale of terror that unfolds in the depths of an impenetrable fog. Ondřej Čech creates an atmosphere of dread where danger lurks at every turn.',
+    stock: 7,
   },
   {
     title: 'Czech Heroes',
@@ -245,6 +252,7 @@ const books = [
     rating: 4.4,
     coverUrl: 'https://via.placeholder.com/150x200?text=Czech+Heroes',
     description: 'An inspiring chronicle of Czech heroes who shaped history through courage and conviction. Martina Pavlíková brings historical figures to life with vivid storytelling.',
+    stock: 3,
   },
   {
     title: 'The Memoir of Anna',
@@ -259,6 +267,7 @@ const books = [
     rating: 4.1,
     coverUrl: 'https://via.placeholder.com/150x200?text=Memoir+of+Anna',
     description: 'A poignant personal account of Anna\'s life journey, filled with triumphs and challenges. This memoir offers intimate insights into personal growth, resilience, and self-discovery.',
+    stock: 18,
   },
 ]
 
@@ -278,6 +287,9 @@ const formats = ['Hardcover book', 'E-book', 'Audiobook']
 
 export function CatalogPage() {
   useDocumentTitle('Catalog | SWI Frontend')
+
+  const [searchParams] = useSearchParams()
+  const searchQuery = searchParams.get('q') || ''
 
   const [age, setAge] = useState(18)
   const [price, setPrice] = useState(450)
@@ -301,12 +313,18 @@ export function CatalogPage() {
     )
   }
 
-  const isFiltersActive = age !== 18 || price !== 450 || length !== 240 || selectedAuthors.length > 0 || selectedFormats.length > 0
+  const isFiltersActive = searchQuery !== '' || age !== 18 || price !== 450 || length !== 240 || selectedAuthors.length > 0 || selectedFormats.length > 0
 
   const activeFilters = (age !== 18 ? 1 : 0) + (price !== 450 ? 1 : 0) + (length !== 240 ? 1 : 0) + selectedAuthors.length + selectedFormats.length
 
   const filteredBooks = books.filter((book) => {
+    const matchesSearch = !searchQuery || 
+      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.category.toLowerCase().includes(searchQuery.toLowerCase())
+    
     return (
+      matchesSearch &&
       book.age <= age &&
       book.price <= price &&
       book.pages <= length &&
@@ -420,17 +438,13 @@ export function CatalogPage() {
         </SectionCard>
 
         <div className="space-y-6">
-          {isFiltersActive ? (
-            <SectionCard eyebrow="Books" title="Filtered results">
+          {searchQuery ? (
+            <SectionCard eyebrow="Search" title={`Results for "${searchQuery}"`}>
               {filteredBooks.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {filteredBooks.map((book) => (
-                    <Link
-                      key={book.title}
-                      to={`/books/${encodeURIComponent(book.title)}`}
-                      className="block rounded-3xl border border-slate-200 bg-slate-50 pl-14 pr-6 py-5 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50"
-                    >
-                      <div className="flex flex-row-reverse gap-4 items-center">
+                    <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
+                      <Link to={`/books/${encodeURIComponent(book.title)}`} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
                         <img
                           src={book.coverUrl}
                           alt={`${book.title} cover`}
@@ -454,8 +468,77 @@ export function CatalogPage() {
                             <span>Age {book.age}+</span>
                           </div>
                         </div>
+                      </Link>
+                      <div className="px-6 pb-5">
+                        {book.stock > 0 ? (
+                          <Link
+                            to="/cart"
+                            className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                          >
+                            Add to cart
+                          </Link>
+                        ) : (
+                          <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
+                            Not available
+                          </span>
+                        )}
                       </div>
-                    </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600">
+                  <p className="text-base font-medium">No books found for "{searchQuery}".</p>
+                  <p className="mt-3 text-sm">Try a different search term.</p>
+                </div>
+              )}
+            </SectionCard>
+          ) : isFiltersActive ? (
+            <SectionCard eyebrow="Books" title="Filtered results">
+              {filteredBooks.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {filteredBooks.map((book) => (
+                    <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
+                      <Link to={`/books/${encodeURIComponent(book.title)}`} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
+                        <img
+                          src={book.coverUrl}
+                          alt={`${book.title} cover`}
+                          className="h-32 w-24 rounded-lg object-cover shadow-sm"
+                        />
+                        <div className="flex-1 flex flex-col gap-1.5">
+                          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{book.category}</p>
+                          <h2 className="text-lg font-semibold text-slate-950">{book.title}</h2>
+                          <p className="text-sm text-slate-600">{book.author}</p>
+                          <div className="flex items-center gap-0.5">
+                            {Array.from({ length: 5 }, (_, i) => (
+                              <span key={i} className={i < Math.floor(book.rating) ? 'text-yellow-400' : 'text-gray-300'}>
+                                ★
+                              </span>
+                            ))}
+                            <span className="ml-0.5 text-xs text-slate-500">({book.rating})</span>
+                          </div>
+                          <div className="flex flex-col gap-1.5 text-sm text-slate-500 pt-1">
+                            <span>{book.pages} pages</span>
+                            <span>{book.price} Kč</span>
+                            <span>Age {book.age}+</span>
+                          </div>
+                        </div>
+                      </Link>
+                      <div className="px-6 pb-5">
+                        {book.stock > 0 ? (
+                          <Link
+                            to="/cart"
+                            className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                          >
+                            Add to cart
+                          </Link>
+                        ) : (
+                          <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
+                            Not available
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -466,9 +549,9 @@ export function CatalogPage() {
               )}
             </SectionCard>
           ) : (
-            <SectionCard eyebrow="Kategorie" title="Vyberte typ knihy">
+            <SectionCard eyebrow="Category" title="Choose your adventure">
               <p className="text-sm leading-6 text-slate-600">
-                Prohlédněte si kategorie v katalogu, které jsou uprostřed obrazovky a připravené pro další filterování a výběr.
+                Browse our collection of books organized into categories. Whether you love thrilling adventures, timeless classics, or thought-provoking mysteries, we have something for every reader. Click on a category to explore the books that await you.
               </p>
               <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 {categories.map((category) => (
@@ -487,31 +570,46 @@ export function CatalogPage() {
 
         </div>
 
-        <SectionCard eyebrow="Discounts" title="Special offers">
+        <SectionCard eyebrow="Discounts" title="Great deals">
           <div className="space-y-4">
             {books.filter((book) => book.discountPercent > 0).slice(0, 5).map((book) => (
-              <Link
-                key={book.title}
-                to={`/books/${encodeURIComponent(book.title)}`}
-                className="block"
-              >
-                <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
-                <img
-                  src={book.coverUrl}
-                  alt={`${book.title} cover`}
-                  className="h-16 w-12 rounded object-cover shadow-sm"
-                />
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-slate-950">{book.title}</h3>
-                  <p className="text-xs text-slate-600">{book.author}</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-900">{book.price} Kč</span>
-                    <span className="text-xs text-slate-500 line-through">{book.originalPrice} Kč</span>
-                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-                      -{book.discountPercent}%
+              <div key={book.title} className="flex flex-col">
+                <Link
+                  to={`/books/${encodeURIComponent(book.title)}`}
+                  className="block"
+                >
+                  <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
+                  <img
+                    src={book.coverUrl}
+                    alt={`${book.title} cover`}
+                    className="h-16 w-12 rounded object-cover shadow-sm"
+                  />
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-slate-950">{book.title}</h3>
+                    <p className="text-xs text-slate-600">{book.author}</p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-sm font-medium text-slate-900">{book.price} Kč</span>
+                      <span className="text-xs text-slate-500 line-through">{book.originalPrice} Kč</span>
+                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                        -{book.discountPercent}%
+                      </span>
+                    </div>
+                  </div>                </div>              </Link>
+                <div className="mt-2 pb-2">
+                  {book.stock > 0 ? (
+                    <Link
+                      to="/cart"
+                      className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                    >
+                      Add to cart
+                    </Link>
+                  ) : (
+                    <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
+                      Not available
                     </span>
-                  </div>
-                </div>                </div>              </Link>
+                  )}
+                </div>
+              </div>
             ))}
             <Link
               to="/discounts"

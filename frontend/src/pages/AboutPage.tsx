@@ -3,9 +3,9 @@ import { SectionCard } from '../components/SectionCard'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 const values = [
-  'Curated reads across fiction, design, business, and lifestyle',
-  'A smooth shopping journey from catalog to checkout',
-  'A reading-first brand with clean, modern digital experience',
+  'What started as a simple idea - making book discovery better - grew into a platform focused on readers first. We wanted to build more than just a store, we wanted a place where books feel alive and easy to explore.',
+  'Our mission is simple: to connect people with books they’ll love. We aim to create a smooth, enjoyable experience - from browsing to checkout - while offering a thoughtfully curated selection across genres.',
+  'We offer carefully curated collections across a wide range of genres, helping you discover books that truly match your interests. Our platform is designed with a clean and distraction-free interface, so you can focus entirely on exploring and enjoying your next read. We also prioritize personalized discovery, making it easier to find books you’ll love. From browsing to checkout, we ensure a fast and seamless shopping experience.',
 ]
 
 export function AboutPage() {
@@ -16,10 +16,10 @@ export function AboutPage() {
       <PageHero
         eyebrow="About Us"
         title="A bookstore built for discovery"
-        description="This page can introduce your brand story, mission, team, and what makes the shop worth coming back to."
+        description="We believe discovering your next favorite book should feel effortless and exciting. Our bookstore is built for curious readers who love exploring new stories, ideas, and perspectives. Whether you're into fiction, business, design, or hidden gems, we make it easy to find books that truly resonate with you."
       />
 
-      <SectionCard eyebrow="Brand Story" title="What this page can hold">
+      <SectionCard eyebrow="Brand Story" title="Our Mission">
         <div className="grid gap-3 md:grid-cols-3">
           {values.map((value) => (
             <div
@@ -32,5 +32,7 @@ export function AboutPage() {
         </div>
       </SectionCard>
     </div>
+
+    
   )
 }

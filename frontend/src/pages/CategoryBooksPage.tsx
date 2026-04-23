@@ -41,6 +41,7 @@ const books = [
     rating: 4.5,
     coverUrl: 'https://via.placeholder.com/150x200?text=Lost+Expedition',
     description: 'Join Erik Hansen on an unforgettable journey through uncharted territories filled with danger, discovery, and wonder. A thrilling adventure that captures the spirit of exploration.',
+    stock: 15,
   },
   {
     title: 'Moonlit Manor',
@@ -55,6 +56,7 @@ const books = [
     rating: 4.2,
     coverUrl: 'https://via.placeholder.com/150x200?text=Moonlit+Manor',
     description: 'A gripping mystery set in an ancient manor where secrets hide behind every door. Sara Doyle weaves an intricate plot of suspense and surprising revelations.',
+    stock: 8,
   },
   {
     title: 'Castle of Stars',
@@ -69,6 +71,7 @@ const books = [
     rating: 4.8,
     coverUrl: 'https://via.placeholder.com/150x200?text=Castle+of+Stars',
     description: 'Explore a magical realm where a castle floats among the stars. An epic fantasy adventure filled with enchantment, heroism, and timeless magic that will captivate readers.',
+    stock: 23,
   },
   {
     title: 'The War Dispatch',
@@ -83,6 +86,7 @@ const books = [
     rating: 4.0,
     coverUrl: 'https://via.placeholder.com/150x200?text=War+Dispatch',
     description: 'A powerful narrative of courage and sacrifice during wartime. Jakub Martínek chronicles the extraordinary stories of soldiers facing impossible odds and finding hope in darkness.',
+    stock: 5,
   },
   {
     title: 'Voices of Autumn',
@@ -97,6 +101,7 @@ const books = [
     rating: 4.3,
     coverUrl: 'https://via.placeholder.com/150x200?text=Voices+of+Autumn',
     description: 'A collection of beautiful and haunting verses that capture the essence of autumn. Lena Novak\'s poetry explores themes of change, reflection, and natural beauty.',
+    stock: 0,
   },
   {
     title: 'A Room for Two',
@@ -111,6 +116,7 @@ const books = [
     rating: 4.6,
     coverUrl: 'https://via.placeholder.com/150x200?text=Room+for+Two',
     description: 'A tender romance about two souls discovering love in unexpected circumstances. Olivia Svobodová crafts an emotional journey about connection, vulnerability, and lasting devotion.',
+    stock: 12,
   },
   {
     title: 'Beyond the Fog',
@@ -125,6 +131,7 @@ const books = [
     rating: 3.9,
     coverUrl: 'https://via.placeholder.com/150x200?text=Beyond+the+Fog',
     description: 'A chilling tale of terror that unfolds in the depths of an impenetrable fog. Ondřej Čech creates an atmosphere of dread where danger lurks at every turn.',
+    stock: 7,
   },
   {
     title: 'Czech Heroes',
@@ -139,6 +146,7 @@ const books = [
     rating: 4.4,
     coverUrl: 'https://via.placeholder.com/150x200?text=Czech+Heroes',
     description: 'An inspiring chronicle of Czech heroes who shaped history through courage and conviction. Martina Pavlíková brings historical figures to life with vivid storytelling.',
+    stock: 3,
   },
   {
     title: 'The Memoir of Anna',
@@ -153,6 +161,7 @@ const books = [
     rating: 4.1,
     coverUrl: 'https://via.placeholder.com/150x200?text=Memoir+of+Anna',
     description: 'A poignant personal account of Anna\'s life journey, filled with triumphs and challenges. This memoir offers intimate insights into personal growth, resilience, and self-discovery.',
+    stock: 18,
   },
 ]
 
@@ -189,12 +198,8 @@ export function CategoryBooksPage() {
         {filteredBooks.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filteredBooks.map((book) => (
-              <Link
-                key={book.title}
-                to={`/books/${encodeURIComponent(book.title)}`}
-                className="block rounded-3xl border border-slate-200 bg-slate-50 pl-14 pr-6 py-5 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50"
-              >
-                <div className="flex flex-row-reverse gap-4 items-center">
+              <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
+                <Link to={`/books/${encodeURIComponent(book.title)}`} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
                   <img
                     src={book.coverUrl}
                     alt={`${book.title} cover`}
@@ -218,8 +223,22 @@ export function CategoryBooksPage() {
                       <span>Age {book.age}+</span>
                     </div>
                   </div>
+                </Link>
+                <div className="px-6 pb-5">
+                  {book.stock > 0 ? (
+                    <Link
+                      to="/cart"
+                      className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                    >
+                      Add to cart
+                    </Link>
+                  ) : (
+                    <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
+                      Not available
+                    </span>
+                  )}
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         ) : (
