@@ -3,6 +3,7 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useLocalePath } from '../utils/locale'
 
 const books = [
   {
@@ -46,6 +47,132 @@ const books = [
     rating: 4.8,
     coverUrl: 'https://via.placeholder.com/150x200?text=Castle+of+Stars',
     stock: 23,
+  },
+  {
+    title: 'Garden of Thorns',
+    author: 'Mira Vale',
+    category: 'Fantasy',
+    age: 13,
+    price: 359,
+    pages: 336,
+    format: 'Hardcover',
+    originalPrice: 399,
+    discountPercent: 10,
+    rating: 4.7,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Garden+of+Thorns',
+    stock: 14,
+  },
+  {
+    title: 'The Ember Crown',
+    author: 'Tomas Reed',
+    category: 'Fantasy',
+    age: 15,
+    price: 389,
+    pages: 392,
+    format: 'Hardcover',
+    originalPrice: 389,
+    discountPercent: 0,
+    rating: 4.4,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Ember+Crown',
+    stock: 9,
+  },
+  {
+    title: 'Winds of Aralon',
+    author: 'Elena Frost',
+    category: 'Fantasy',
+    age: 12,
+    price: 329,
+    pages: 288,
+    format: 'E-book',
+    originalPrice: 329,
+    discountPercent: 0,
+    rating: 4.1,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Winds+of+Aralon',
+    stock: 20,
+  },
+  {
+    title: 'Dragonfall Night',
+    author: 'Jonas Black',
+    category: 'Fantasy',
+    age: 16,
+    price: 449,
+    pages: 512,
+    format: 'Audiobook',
+    originalPrice: 499,
+    discountPercent: 10,
+    rating: 4.6,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Dragonfall+Night',
+    stock: 11,
+  },
+  {
+    title: 'The Silver Oracle',
+    author: 'Clara Moon',
+    category: 'Fantasy',
+    age: 14,
+    price: 299,
+    pages: 264,
+    format: 'E-book',
+    originalPrice: 299,
+    discountPercent: 0,
+    rating: 4.0,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Silver+Oracle',
+    stock: 17,
+  },
+  {
+    title: 'Forest of the Hollow King',
+    author: 'Adam Kral',
+    category: 'Fantasy',
+    age: 15,
+    price: 419,
+    pages: 456,
+    format: 'Hardcover',
+    originalPrice: 419,
+    discountPercent: 0,
+    rating: 4.5,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Hollow+King',
+    stock: 6,
+  },
+  {
+    title: 'Spellbound Harbor',
+    author: 'Iris Lake',
+    category: 'Fantasy',
+    age: 10,
+    price: 259,
+    pages: 224,
+    format: 'E-book',
+    originalPrice: 279,
+    discountPercent: 7,
+    rating: 4.2,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Spellbound+Harbor',
+    stock: 25,
+  },
+  {
+    title: 'Ashes of the Moon Gate',
+    author: 'Ronan Grey',
+    category: 'Fantasy',
+    age: 17,
+    price: 469,
+    pages: 540,
+    format: 'Hardcover',
+    originalPrice: 469,
+    discountPercent: 0,
+    rating: 4.7,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Moon+Gate',
+    stock: 8,
+  },
+  {
+    title: 'The Crystal Familiar',
+    author: 'Petra Wild',
+    category: 'Fantasy',
+    age: 11,
+    price: 289,
+    pages: 248,
+    format: 'Audiobook',
+    originalPrice: 289,
+    discountPercent: 0,
+    rating: 4.3,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Crystal+Familiar',
+    stock: 19,
   },
   {
     title: 'The War Dispatch',
@@ -136,6 +263,7 @@ const books = [
 export function DiscountsPage() {
   useDocumentTitle('Discounts | Find my book')
   const { addToCart } = useCart()
+  const toLocalePath = useLocalePath()
 
   const discountedBooks = books.filter((book) => book.discountPercent > 0)
 
@@ -158,7 +286,7 @@ export function DiscountsPage() {
         description="Discover amazing deals on our discounted books. Save money while expanding your library."
       >
         <Link
-          to="/catalog"
+          to={toLocalePath('/catalog')}
           className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
         >
           Back to catalog
@@ -169,7 +297,7 @@ export function DiscountsPage() {
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {discountedBooks.map((book) => (
             <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
-              <Link to={`/books/${encodeURIComponent(book.title)}`} className="flex flex-1 gap-4">
+              <Link to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)} className="flex flex-1 gap-4">
                 <img
                   src={book.coverUrl}
                   alt={`${book.title} cover`}

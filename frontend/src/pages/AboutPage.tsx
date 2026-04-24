@@ -50,7 +50,7 @@ export function AboutPage() {
           </div>
           <p>
             <span className="font-semibold text-slate-950">Contact our support:</span>{' '}
-            +420 734 581 209
+            +420 777 428 913
           </p>
         </div>
       </SectionCard>

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
 
 export type CartBook = {
@@ -20,6 +21,7 @@ type CartContextValue = {
   addToCart: (book: CartBook) => void
   updateQuantity: (title: string, delta: number) => void
   removeItem: (title: string) => void
+  clearCart: () => void
 }
 
 const CART_STORAGE_KEY = 'swi-cart-items'
@@ -27,22 +29,20 @@ const CART_STORAGE_KEY = 'swi-cart-items'
 const CartContext = createContext<CartContextValue | null>(null)
 
 export function CartProvider({ children }: PropsWithChildren) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [cartMessage, setCartMessage] = useState('')
-
-  useEffect(() => {
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     const savedCart = window.localStorage.getItem(CART_STORAGE_KEY)
 
     if (!savedCart) {
-      return
+      return []
     }
 
     try {
-      setCartItems(JSON.parse(savedCart) as CartItem[])
+      return JSON.parse(savedCart) as CartItem[]
     } catch {
-      setCartItems([])
+      return []
     }
-  }, [])
+  })
+  const [cartMessage, setCartMessage] = useState('')
 
   useEffect(() => {
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems))
@@ -99,6 +99,9 @@ export function CartProvider({ children }: PropsWithChildren) {
       },
       removeItem: (title: string) => {
         setCartItems((current) => current.filter((item) => item.book.title !== title))
+      },
+      clearCart: () => {
+        setCartItems([])
       },
     }),
     [cartItems, cartMessage],

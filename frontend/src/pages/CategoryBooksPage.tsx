@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useLocalePath } from '../utils/locale'
 
 const categoryMap: Record<string, string> = {
   'adventure-stories': 'Adventure stories',
@@ -73,6 +75,141 @@ const books = [
     coverUrl: 'https://via.placeholder.com/150x200?text=Castle+of+Stars',
     description: 'Explore a magical realm where a castle floats among the stars. An epic fantasy adventure filled with enchantment, heroism, and timeless magic that will captivate readers.',
     stock: 23,
+  },
+  {
+    title: 'Garden of Thorns',
+    author: 'Mira Vale',
+    category: 'Fantasy',
+    age: 13,
+    price: 359,
+    pages: 336,
+    format: 'Hardcover',
+    originalPrice: 399,
+    discountPercent: 10,
+    rating: 4.7,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Garden+of+Thorns',
+    description: 'A cursed royal garden hides ancient magic, dangerous bargains, and a secret that could save an entire kingdom.',
+    stock: 14,
+  },
+  {
+    title: 'The Ember Crown',
+    author: 'Tomas Reed',
+    category: 'Fantasy',
+    age: 15,
+    price: 389,
+    pages: 392,
+    format: 'Hardcover',
+    originalPrice: 389,
+    discountPercent: 0,
+    rating: 4.4,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Ember+Crown',
+    description: 'A runaway heir must claim a burning crown before rival kingdoms awaken the fire beneath the mountains.',
+    stock: 9,
+  },
+  {
+    title: 'Winds of Aralon',
+    author: 'Elena Frost',
+    category: 'Fantasy',
+    age: 12,
+    price: 329,
+    pages: 288,
+    format: 'E-book',
+    originalPrice: 329,
+    discountPercent: 0,
+    rating: 4.1,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Winds+of+Aralon',
+    description: 'Sky sailors, storm spirits, and a young mapmaker collide in a floating world ruled by magical winds.',
+    stock: 20,
+  },
+  {
+    title: 'Dragonfall Night',
+    author: 'Jonas Black',
+    category: 'Fantasy',
+    age: 16,
+    price: 449,
+    pages: 512,
+    format: 'Audiobook',
+    originalPrice: 499,
+    discountPercent: 10,
+    rating: 4.6,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Dragonfall+Night',
+    description: 'When dragons fall from the stars, a village hunter discovers the night sky has been hiding an old war.',
+    stock: 11,
+  },
+  {
+    title: 'The Silver Oracle',
+    author: 'Clara Moon',
+    category: 'Fantasy',
+    age: 14,
+    price: 299,
+    pages: 264,
+    format: 'E-book',
+    originalPrice: 299,
+    discountPercent: 0,
+    rating: 4.0,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Silver+Oracle',
+    description: 'A reluctant seer follows silver visions through a city of mirrors where every prophecy has a price.',
+    stock: 17,
+  },
+  {
+    title: 'Forest of the Hollow King',
+    author: 'Adam Kral',
+    category: 'Fantasy',
+    age: 15,
+    price: 419,
+    pages: 456,
+    format: 'Hardcover',
+    originalPrice: 419,
+    discountPercent: 0,
+    rating: 4.5,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Hollow+King',
+    description: 'Deep in an enchanted forest, a forgotten king waits for someone brave enough to break his hollow crown.',
+    stock: 6,
+  },
+  {
+    title: 'Spellbound Harbor',
+    author: 'Iris Lake',
+    category: 'Fantasy',
+    age: 10,
+    price: 259,
+    pages: 224,
+    format: 'E-book',
+    originalPrice: 279,
+    discountPercent: 7,
+    rating: 4.2,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Spellbound+Harbor',
+    description: 'A seaside town of enchanted ships and talking lanterns becomes the key to rescuing a lost moon.',
+    stock: 25,
+  },
+  {
+    title: 'Ashes of the Moon Gate',
+    author: 'Ronan Grey',
+    category: 'Fantasy',
+    age: 17,
+    price: 469,
+    pages: 540,
+    format: 'Hardcover',
+    originalPrice: 469,
+    discountPercent: 0,
+    rating: 4.7,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Moon+Gate',
+    description: 'After a lunar portal shatters, rival mages race through its ashes to stop an empire from returning.',
+    stock: 8,
+  },
+  {
+    title: 'The Crystal Familiar',
+    author: 'Petra Wild',
+    category: 'Fantasy',
+    age: 11,
+    price: 289,
+    pages: 248,
+    format: 'Audiobook',
+    originalPrice: 289,
+    discountPercent: 0,
+    rating: 4.3,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Crystal+Familiar',
+    description: 'A student mage bonds with a crystal creature that remembers spells no one else can read.',
+    stock: 19,
   },
   {
     title: 'The War Dispatch',
@@ -166,16 +303,27 @@ const books = [
   },
 ]
 
+const BOOKS_PER_PAGE = 9
+
 export function CategoryBooksPage() {
   const { category } = useParams<{ category: string }>()
   const { addToCart } = useCart()
+  const [pagination, setPagination] = useState({ categoryTitle: '', page: 1 })
+  const toLocalePath = useLocalePath()
   const categoryTitle = category ? categoryMap[category] : undefined
+  const currentPage =
+    pagination.categoryTitle === categoryTitle ? pagination.page : 1
 
   useDocumentTitle(categoryTitle ? `${categoryTitle} | SWI Frontend` : 'Category | SWI Frontend')
 
   const filteredBooks = categoryTitle
     ? books.filter((book) => book.category === categoryTitle)
     : []
+  const pageCount = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE)
+  const paginatedBooks = filteredBooks.slice(
+    (currentPage - 1) * BOOKS_PER_PAGE,
+    currentPage * BOOKS_PER_PAGE,
+  )
 
   const handleAddToCart = (book: (typeof books)[number]) => {
     addToCart({
@@ -200,7 +348,7 @@ export function CategoryBooksPage() {
         }
       >
         <Link
-          to="/catalog"
+          to={toLocalePath('/catalog')}
           className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
         >
           Back to catalog
@@ -210,9 +358,9 @@ export function CategoryBooksPage() {
       <SectionCard eyebrow="Books" title={categoryTitle ?? 'No category selected'}>
         {filteredBooks.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredBooks.map((book) => (
+            {paginatedBooks.map((book) => (
               <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
-                <Link to={`/books/${encodeURIComponent(book.title)}`} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
+                <Link to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
                   <img
                     src={book.coverUrl}
                     alt={`${book.title} cover`}
@@ -254,6 +402,30 @@ export function CategoryBooksPage() {
                 </div>
               </div>
             ))}
+            {pageCount > 1 ? (
+              <div className="col-span-full mt-4 flex justify-center gap-2">
+                {Array.from({ length: pageCount }, (_, index) => {
+                  const pageNumber = index + 1
+
+                  return (
+                    <button
+                      key={pageNumber}
+                      type="button"
+                      onClick={() =>
+                        setPagination({ categoryTitle: categoryTitle ?? '', page: pageNumber })
+                      }
+                      className={
+                        currentPage === pageNumber
+                          ? 'flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-sm font-medium text-white'
+                          : 'flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50'
+                      }
+                    >
+                      {pageNumber}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600">

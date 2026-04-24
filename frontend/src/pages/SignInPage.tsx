@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { getStoredAccount, saveStoredAccount } from '../utils/authStorage'
 import { cn } from '../utils/cn'
+import { useLocalePath } from '../utils/locale'
 
 type AuthTab = 'login' | 'register'
 
@@ -47,6 +48,7 @@ export function SignInPage() {
   const [profileMessage, setProfileMessage] = useState('')
   const { isSignedIn, signIn } = useAuth()
   const navigate = useNavigate()
+  const toLocalePath = useLocalePath()
   const copy = tabCopy[activeTab]
 
   useDocumentTitle('Sign In | SWI Frontend')
@@ -90,7 +92,7 @@ export function SignInPage() {
               onSuccess={() => {
                 signIn()
                 setProfileMessage('')
-                navigate('/profile')
+                navigate(toLocalePath('/profile'))
               }}
             />
           ) : (
@@ -98,7 +100,7 @@ export function SignInPage() {
               onSuccess={() => {
                 signIn()
                 setProfileMessage('')
-                navigate('/profile')
+                navigate(toLocalePath('/profile'))
               }}
             />
           )}
@@ -133,7 +135,7 @@ export function SignInPage() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              to="/profile"
+              to={toLocalePath('/profile')}
               onClick={(event) => {
                 if (!isSignedIn) {
                   event.preventDefault()
@@ -148,7 +150,7 @@ export function SignInPage() {
               View profile
             </Link>
             <Link
-              to="/about"
+              to={toLocalePath('/about')}
               className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
             >
               Read about us
@@ -168,6 +170,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const toLocalePath = useLocalePath()
 
   return (
     <form
@@ -230,7 +233,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
       <div className="flex flex-wrap justify-start gap-3 text-sm text-slate-600">
         <Link
-          to="/reset-password"
+          to={toLocalePath('/reset-password')}
           className="font-medium text-cyan-700 transition hover:text-cyan-800"
         >
           Forgot password?

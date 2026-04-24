@@ -4,6 +4,7 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useLocalePath } from '../utils/locale'
 
 const categories = [
   {
@@ -181,6 +182,141 @@ const books = [
     stock: 23,
   },
   {
+    title: 'Garden of Thorns',
+    author: 'Mira Vale',
+    category: 'Fantasy',
+    age: 13,
+    price: 359,
+    pages: 336,
+    format: 'Hardcover',
+    originalPrice: 399,
+    discountPercent: 10,
+    rating: 4.7,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Garden+of+Thorns',
+    description: 'A cursed royal garden hides ancient magic, dangerous bargains, and a secret that could save an entire kingdom.',
+    stock: 14,
+  },
+  {
+    title: 'The Ember Crown',
+    author: 'Tomas Reed',
+    category: 'Fantasy',
+    age: 15,
+    price: 389,
+    pages: 392,
+    format: 'Hardcover',
+    originalPrice: 389,
+    discountPercent: 0,
+    rating: 4.4,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Ember+Crown',
+    description: 'A runaway heir must claim a burning crown before rival kingdoms awaken the fire beneath the mountains.',
+    stock: 9,
+  },
+  {
+    title: 'Winds of Aralon',
+    author: 'Elena Frost',
+    category: 'Fantasy',
+    age: 12,
+    price: 329,
+    pages: 288,
+    format: 'E-book',
+    originalPrice: 329,
+    discountPercent: 0,
+    rating: 4.1,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Winds+of+Aralon',
+    description: 'Sky sailors, storm spirits, and a young mapmaker collide in a floating world ruled by magical winds.',
+    stock: 20,
+  },
+  {
+    title: 'Dragonfall Night',
+    author: 'Jonas Black',
+    category: 'Fantasy',
+    age: 16,
+    price: 449,
+    pages: 512,
+    format: 'Audiobook',
+    originalPrice: 499,
+    discountPercent: 10,
+    rating: 4.6,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Dragonfall+Night',
+    description: 'When dragons fall from the stars, a village hunter discovers the night sky has been hiding an old war.',
+    stock: 11,
+  },
+  {
+    title: 'The Silver Oracle',
+    author: 'Clara Moon',
+    category: 'Fantasy',
+    age: 14,
+    price: 299,
+    pages: 264,
+    format: 'E-book',
+    originalPrice: 299,
+    discountPercent: 0,
+    rating: 4.0,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Silver+Oracle',
+    description: 'A reluctant seer follows silver visions through a city of mirrors where every prophecy has a price.',
+    stock: 17,
+  },
+  {
+    title: 'Forest of the Hollow King',
+    author: 'Adam Kral',
+    category: 'Fantasy',
+    age: 15,
+    price: 419,
+    pages: 456,
+    format: 'Hardcover',
+    originalPrice: 419,
+    discountPercent: 0,
+    rating: 4.5,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Hollow+King',
+    description: 'Deep in an enchanted forest, a forgotten king waits for someone brave enough to break his hollow crown.',
+    stock: 6,
+  },
+  {
+    title: 'Spellbound Harbor',
+    author: 'Iris Lake',
+    category: 'Fantasy',
+    age: 10,
+    price: 259,
+    pages: 224,
+    format: 'E-book',
+    originalPrice: 279,
+    discountPercent: 7,
+    rating: 4.2,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Spellbound+Harbor',
+    description: 'A seaside town of enchanted ships and talking lanterns becomes the key to rescuing a lost moon.',
+    stock: 25,
+  },
+  {
+    title: 'Ashes of the Moon Gate',
+    author: 'Ronan Grey',
+    category: 'Fantasy',
+    age: 17,
+    price: 469,
+    pages: 540,
+    format: 'Hardcover',
+    originalPrice: 469,
+    discountPercent: 0,
+    rating: 4.7,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Moon+Gate',
+    description: 'After a lunar portal shatters, rival mages race through its ashes to stop an empire from returning.',
+    stock: 8,
+  },
+  {
+    title: 'The Crystal Familiar',
+    author: 'Petra Wild',
+    category: 'Fantasy',
+    age: 11,
+    price: 289,
+    pages: 248,
+    format: 'Audiobook',
+    originalPrice: 289,
+    discountPercent: 0,
+    rating: 4.3,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Crystal+Familiar',
+    description: 'A student mage bonds with a crystal creature that remembers spells no one else can read.',
+    stock: 19,
+  },
+  {
     title: 'The War Dispatch',
     author: 'Jakub Martínek',
     category: 'War',
@@ -274,28 +410,68 @@ const books = [
 
 const authors = [
   'Anna Dvořáková',
+  'Adam Kral',
+  'Clara Moon',
+  'Elena Frost',
   'Erik Hansen',
+  'Iris Lake',
   'Jakub Martínek',
+  'Jonas Black',
   'Lena Novak',
   'Martina Pavlíková',
+  'Mira Vale',
   'Nina Růžičková',
   'Ondřej Čech',
   'Olivia Svobodová',
+  'Petra Wild',
+  'Ronan Grey',
   'Sara Doyle',
+  'Tomas Reed',
 ]
 
 const formats = ['Hardcover book', 'E-book', 'Audiobook']
+
+const catalogPriceRange = books.reduce(
+  (range, book) => ({
+    min: Math.min(range.min, book.price),
+    max: Math.max(range.max, book.price),
+  }),
+  { min: books[0]?.price ?? 0, max: books[0]?.price ?? 0 },
+)
+
+const catalogLengthRange = books.reduce(
+  (range, book) => ({
+    min: Math.min(range.min, book.pages),
+    max: Math.max(range.max, book.pages),
+  }),
+  { min: books[0]?.pages ?? 0, max: books[0]?.pages ?? 0 },
+)
+
+const DEFAULT_AGE = 0
+const DEFAULT_PRICE = catalogPriceRange.min
+const DEFAULT_LENGTH = catalogLengthRange.min
+
+function normalizeSearchText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
 
 export function CatalogPage() {
   useDocumentTitle('Catalog | SWI Frontend')
 
   const { addToCart } = useCart()
   const [searchParams] = useSearchParams()
+  const toLocalePath = useLocalePath()
   const searchQuery = searchParams.get('q') || ''
 
-  const [age, setAge] = useState(18)
-  const [price, setPrice] = useState(450)
-  const [length, setLength] = useState(240)
+  const [age, setAge] = useState(DEFAULT_AGE)
+  const [price, setPrice] = useState(DEFAULT_PRICE)
+  const [length, setLength] = useState(DEFAULT_LENGTH)
+  const [isAgeFilterActive, setIsAgeFilterActive] = useState(false)
+  const [isPriceFilterActive, setIsPriceFilterActive] = useState(false)
+  const [isLengthFilterActive, setIsLengthFilterActive] = useState(false)
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>([])
   const [selectedFormats, setSelectedFormats] = useState<string[]>([])
 
@@ -315,9 +491,13 @@ export function CatalogPage() {
     )
   }
 
-  const isFiltersActive = searchQuery !== '' || age !== 18 || price !== 450 || length !== 240 || selectedAuthors.length > 0 || selectedFormats.length > 0
+  const normalizedSearchTokens = normalizeSearchText(searchQuery)
+    .split(/\s+/)
+    .filter(Boolean)
 
-  const activeFilters = (age !== 18 ? 1 : 0) + (price !== 450 ? 1 : 0) + (length !== 240 ? 1 : 0) + selectedAuthors.length + selectedFormats.length
+  const isFiltersActive = searchQuery !== '' || isAgeFilterActive || isPriceFilterActive || isLengthFilterActive || selectedAuthors.length > 0 || selectedFormats.length > 0
+
+  const activeFilters = (isAgeFilterActive ? 1 : 0) + (isPriceFilterActive ? 1 : 0) + (isLengthFilterActive ? 1 : 0) + selectedAuthors.length + selectedFormats.length
 
   const handleAddToCart = (book: (typeof books)[number]) => {
     addToCart({
@@ -331,16 +511,16 @@ export function CatalogPage() {
   }
 
   const filteredBooks = books.filter((book) => {
-    const matchesSearch = !searchQuery || 
-      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.category.toLowerCase().includes(searchQuery.toLowerCase())
+    const searchableText = normalizeSearchText(`${book.title} ${book.author} ${book.category}`)
+    const matchesSearch =
+      normalizedSearchTokens.length === 0 ||
+      normalizedSearchTokens.every((token) => searchableText.includes(token))
     
     return (
       matchesSearch &&
-      book.age <= age &&
-      book.price <= price &&
-      book.pages <= length &&
+      (!isAgeFilterActive || book.age <= age) &&
+      (!isPriceFilterActive || book.price <= price) &&
+      (!isLengthFilterActive || book.pages <= length) &&
       (selectedAuthors.length === 0 || selectedAuthors.includes(book.author)) &&
       (selectedFormats.length === 0 || selectedFormats.includes(book.format))
     )
@@ -367,7 +547,10 @@ export function CatalogPage() {
                 min={0}
                 max={100}
                 value={age}
-                onChange={(event) => setAge(Number(event.target.value))}
+                onChange={(event) => {
+                  setAge(Number(event.target.value))
+                  setIsAgeFilterActive(true)
+                }}
                 className="w-full accent-cyan-600"
               />
               <div className="flex items-center justify-between text-xs text-slate-500">
@@ -383,15 +566,18 @@ export function CatalogPage() {
               </div>
               <input
                 type="range"
-                min={100}
-                max={1200}
+                min={catalogPriceRange.min}
+                max={catalogPriceRange.max}
                 value={price}
-                onChange={(event) => setPrice(Number(event.target.value))}
+                onChange={(event) => {
+                  setPrice(Number(event.target.value))
+                  setIsPriceFilterActive(true)
+                }}
                 className="w-full accent-cyan-600"
               />
               <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>100 Kč</span>
-                <span>1200 Kč</span>
+                <span>{catalogPriceRange.min} Kč</span>
+                <span>{catalogPriceRange.max} Kč</span>
               </div>
             </div>
 
@@ -402,15 +588,18 @@ export function CatalogPage() {
               </div>
               <input
                 type="range"
-                min={80}
-                max={900}
+                min={catalogLengthRange.min}
+                max={catalogLengthRange.max}
                 value={length}
-                onChange={(event) => setLength(Number(event.target.value))}
+                onChange={(event) => {
+                  setLength(Number(event.target.value))
+                  setIsLengthFilterActive(true)
+                }}
                 className="w-full accent-cyan-600"
               />
               <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>80 pages</span>
-                <span>900 pages</span>
+                <span>{catalogLengthRange.min} pages</span>
+                <span>{catalogLengthRange.max} pages</span>
               </div>
             </div>
 
@@ -452,12 +641,23 @@ export function CatalogPage() {
 
         <div className="space-y-6">
           {searchQuery ? (
-            <SectionCard eyebrow="Search" title={`Results for "${searchQuery}"`}>
+            <SectionCard
+              eyebrow="Search"
+              title={`Results for "${searchQuery}"`}
+              actions={
+                <Link
+                  to={toLocalePath('/catalog')}
+                  className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                >
+                  Back to genres
+                </Link>
+              }
+            >
               {filteredBooks.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {filteredBooks.map((book) => (
                     <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
-                      <Link to={`/books/${encodeURIComponent(book.title)}`} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
+                      <Link to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
                         <img
                           src={book.coverUrl}
                           alt={`${book.title} cover`}
@@ -513,7 +713,7 @@ export function CatalogPage() {
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {filteredBooks.map((book) => (
                     <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
-                      <Link to={`/books/${encodeURIComponent(book.title)}`} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
+                      <Link to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
                         <img
                           src={book.coverUrl}
                           alt={`${book.title} cover`}
@@ -572,7 +772,7 @@ export function CatalogPage() {
                 {categories.map((category) => (
                   <Link
                     key={category.slug}
-                    to={`/catalog/${category.slug}`}
+                    to={toLocalePath(`/catalog/${category.slug}`)}
                     className="group rounded-3xl border border-slate-200 bg-slate-50 py-6 pl-12 pr-12 text-center shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50"
                   >
                     <h2 className="mt-4 text-xl font-semibold text-slate-950">{category.title}</h2>
@@ -590,7 +790,7 @@ export function CatalogPage() {
             {books.filter((book) => book.discountPercent > 0).slice(0, 5).map((book) => (
               <div key={book.title} className="flex flex-col">
                 <Link
-                  to={`/books/${encodeURIComponent(book.title)}`}
+                  to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)}
                   className="block"
                 >
                   <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
@@ -628,7 +828,7 @@ export function CatalogPage() {
               </div>
             ))}
             <Link
-              to="/discounts"
+              to={toLocalePath('/discounts')}
               className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
               Show more

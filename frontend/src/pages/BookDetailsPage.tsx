@@ -3,6 +3,7 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useLocalePath } from '../utils/locale'
 
 const books = [
   {
@@ -49,6 +50,141 @@ const books = [
     coverUrl: 'https://via.placeholder.com/150x200?text=Castle+of+Stars',
     description: 'Explore a magical realm where a castle floats among the stars. An epic fantasy adventure filled with enchantment, heroism, and timeless magic that will captivate readers.',
     stock: 23,
+  },
+  {
+    title: 'Garden of Thorns',
+    author: 'Mira Vale',
+    category: 'Fantasy',
+    age: 13,
+    price: 359,
+    pages: 336,
+    format: 'Hardcover',
+    originalPrice: 399,
+    discountPercent: 10,
+    rating: 4.7,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Garden+of+Thorns',
+    description: 'A cursed royal garden hides ancient magic, dangerous bargains, and a secret that could save an entire kingdom.',
+    stock: 14,
+  },
+  {
+    title: 'The Ember Crown',
+    author: 'Tomas Reed',
+    category: 'Fantasy',
+    age: 15,
+    price: 389,
+    pages: 392,
+    format: 'Hardcover',
+    originalPrice: 389,
+    discountPercent: 0,
+    rating: 4.4,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Ember+Crown',
+    description: 'A runaway heir must claim a burning crown before rival kingdoms awaken the fire beneath the mountains.',
+    stock: 9,
+  },
+  {
+    title: 'Winds of Aralon',
+    author: 'Elena Frost',
+    category: 'Fantasy',
+    age: 12,
+    price: 329,
+    pages: 288,
+    format: 'E-book',
+    originalPrice: 329,
+    discountPercent: 0,
+    rating: 4.1,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Winds+of+Aralon',
+    description: 'Sky sailors, storm spirits, and a young mapmaker collide in a floating world ruled by magical winds.',
+    stock: 20,
+  },
+  {
+    title: 'Dragonfall Night',
+    author: 'Jonas Black',
+    category: 'Fantasy',
+    age: 16,
+    price: 449,
+    pages: 512,
+    format: 'Audiobook',
+    originalPrice: 499,
+    discountPercent: 10,
+    rating: 4.6,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Dragonfall+Night',
+    description: 'When dragons fall from the stars, a village hunter discovers the night sky has been hiding an old war.',
+    stock: 11,
+  },
+  {
+    title: 'The Silver Oracle',
+    author: 'Clara Moon',
+    category: 'Fantasy',
+    age: 14,
+    price: 299,
+    pages: 264,
+    format: 'E-book',
+    originalPrice: 299,
+    discountPercent: 0,
+    rating: 4.0,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Silver+Oracle',
+    description: 'A reluctant seer follows silver visions through a city of mirrors where every prophecy has a price.',
+    stock: 17,
+  },
+  {
+    title: 'Forest of the Hollow King',
+    author: 'Adam Kral',
+    category: 'Fantasy',
+    age: 15,
+    price: 419,
+    pages: 456,
+    format: 'Hardcover',
+    originalPrice: 419,
+    discountPercent: 0,
+    rating: 4.5,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Hollow+King',
+    description: 'Deep in an enchanted forest, a forgotten king waits for someone brave enough to break his hollow crown.',
+    stock: 6,
+  },
+  {
+    title: 'Spellbound Harbor',
+    author: 'Iris Lake',
+    category: 'Fantasy',
+    age: 10,
+    price: 259,
+    pages: 224,
+    format: 'E-book',
+    originalPrice: 279,
+    discountPercent: 7,
+    rating: 4.2,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Spellbound+Harbor',
+    description: 'A seaside town of enchanted ships and talking lanterns becomes the key to rescuing a lost moon.',
+    stock: 25,
+  },
+  {
+    title: 'Ashes of the Moon Gate',
+    author: 'Ronan Grey',
+    category: 'Fantasy',
+    age: 17,
+    price: 469,
+    pages: 540,
+    format: 'Hardcover',
+    originalPrice: 469,
+    discountPercent: 0,
+    rating: 4.7,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Moon+Gate',
+    description: 'After a lunar portal shatters, rival mages race through its ashes to stop an empire from returning.',
+    stock: 8,
+  },
+  {
+    title: 'The Crystal Familiar',
+    author: 'Petra Wild',
+    category: 'Fantasy',
+    age: 11,
+    price: 289,
+    pages: 248,
+    format: 'Audiobook',
+    originalPrice: 289,
+    discountPercent: 0,
+    rating: 4.3,
+    coverUrl: 'https://via.placeholder.com/150x200?text=Crystal+Familiar',
+    description: 'A student mage bonds with a crystal creature that remembers spells no one else can read.',
+    stock: 19,
   },
   {
     title: 'The War Dispatch',
@@ -145,6 +281,7 @@ const books = [
 export function BookDetailsPage() {
   const { bookId } = useParams()
   const { addToCart } = useCart()
+  const toLocalePath = useLocalePath()
   const decodedTitle = bookId ? decodeURIComponent(bookId) : ''
   const book = books.find((b) => b.title === decodedTitle)
   useDocumentTitle(`${book?.title || 'Book Details'} | SWI Frontend`)
@@ -170,7 +307,7 @@ export function BookDetailsPage() {
       >
         <div className="flex flex-wrap gap-3">
           <Link
-            to="/catalog"
+            to={toLocalePath('/catalog')}
             className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
           >
             Back to catalog

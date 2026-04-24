@@ -4,6 +4,7 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { getStoredAccount, saveStoredAccount } from '../utils/authStorage'
+import { useLocalePath } from '../utils/locale'
 
 const inputClassName =
   'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white'
@@ -16,6 +17,7 @@ export function ResetPasswordPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const navigate = useNavigate()
+  const toLocalePath = useLocalePath()
 
   useDocumentTitle('Reset Password | SWI Frontend')
 
@@ -86,7 +88,7 @@ export function ResetPasswordPage() {
         description="Confirm your account e-mail first, then choose a new password for your sign-in."
       >
         <Link
-          to="/sign-in"
+          to={toLocalePath('/sign-in')}
           className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
         >
           Back to sign in
@@ -165,7 +167,7 @@ export function ResetPasswordPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate('/sign-in')}
+                  onClick={() => navigate(toLocalePath('/sign-in'))}
                   className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                 >
                   Go to sign in

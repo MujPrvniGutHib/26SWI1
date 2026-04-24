@@ -3,10 +3,12 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useLocalePath } from '../utils/locale'
 
 export function CartPage() {
   useDocumentTitle('Cart | SWI Frontend')
   const { cartItems, updateQuantity, removeItem } = useCart()
+  const toLocalePath = useLocalePath()
 
   const total = cartItems.reduce((sum, item) => sum + item.book.price * item.quantity, 0)
 
@@ -23,14 +25,14 @@ export function CartPage() {
       >
         <div className="flex flex-wrap gap-3">
           <Link
-            to="/catalog"
+            to={toLocalePath('/catalog')}
             className="inline-flex rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
           >
             Back to catalog
           </Link>
           {cartItems.length > 0 ? (
             <Link
-              to="/checkout"
+              to={toLocalePath('/checkout')}
               className="inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
               Continue to checkout
@@ -47,7 +49,7 @@ export function CartPage() {
                 key={item.book.title}
                 className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"
               >
-                <Link to={`/books/${encodeURIComponent(item.book.title)}`} className="shrink-0">
+                <Link to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)} className="shrink-0">
                   <img
                     src={item.book.coverUrl}
                     alt={`${item.book.title} cover`}
@@ -56,13 +58,13 @@ export function CartPage() {
                 </Link>
                 <div className="min-w-0 flex-1">
                   <Link
-                    to={`/books/${encodeURIComponent(item.book.title)}`}
+                    to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)}
                     className="text-sm font-semibold uppercase tracking-wide text-cyan-700 hover:underline"
                   >
                     {item.book.category}
                   </Link>
                   <Link
-                    to={`/books/${encodeURIComponent(item.book.title)}`}
+                    to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)}
                     className="block text-lg font-semibold text-slate-950 hover:underline"
                   >
                     {item.book.title}
@@ -109,7 +111,7 @@ export function CartPage() {
           <div className="py-8 text-center">
             <p className="text-slate-600">Your cart is empty.</p>
             <Link
-              to="/catalog"
+              to={toLocalePath('/catalog')}
               className="mt-4 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
               Browse catalog

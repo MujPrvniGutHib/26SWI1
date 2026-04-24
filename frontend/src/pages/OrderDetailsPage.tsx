@@ -1,13 +1,15 @@
 import { Link, useParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
-import { orders } from '../data/orders'
+import { getAllOrders } from '../data/orders'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useLocalePath } from '../utils/locale'
 
 export function OrderDetailsPage() {
   const { orderId } = useParams()
+  const toLocalePath = useLocalePath()
   const decodedOrderId = orderId ? decodeURIComponent(orderId) : ''
-  const order = orders.find((entry) => entry.id === decodedOrderId)
+  const order = getAllOrders().find((entry) => entry.id === decodedOrderId)
 
   useDocumentTitle(`${order?.id || 'Order Details'} | SWI Frontend`)
 
@@ -20,7 +22,7 @@ export function OrderDetailsPage() {
           description="We could not find the order you selected."
         >
           <Link
-            to="/profile"
+            to={toLocalePath('/profile')}
             className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
           >
             Back to profile
@@ -39,7 +41,7 @@ export function OrderDetailsPage() {
       >
         <div className="flex flex-wrap gap-3">
           <Link
-            to="/profile"
+            to={toLocalePath('/profile')}
             className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
           >
             Back to profile
@@ -70,6 +72,7 @@ export function OrderDetailsPage() {
             <DetailRow label="Status" value={order.status} />
             <DetailRow label="Placed on" value={order.placedOn} />
             <DetailRow label="Items" value={order.itemsLabel} />
+            {order.deliveryCost ? <DetailRow label="Delivery cost" value={order.deliveryCost} /> : null}
             <DetailRow label="Total" value={order.total} />
             <DetailRow label="Delivery" value={order.deliveryMethod} />
             <DetailRow label="Payment" value={order.paymentMethod} />

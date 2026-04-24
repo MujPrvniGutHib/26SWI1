@@ -3,39 +3,55 @@ import { Link, useNavigate } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useAuth } from '../context/AuthContext'
-import { orders, type OrderRecord } from '../data/orders'
+import { deleteStoredOrders, getAllOrders, type OrderRecord } from '../data/orders'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { getStoredAccount, saveStoredAccount } from '../utils/authStorage'
+import {
+  deleteStoredProfile,
+  getStoredAccount,
+  getStoredProfileDetails,
+  saveStoredAccount,
+  saveStoredProfileDetails,
+} from '../utils/authStorage'
+import { useLocalePath } from '../utils/locale'
 
 export function ProfilePage() {
   useDocumentTitle('Profile | SWI Frontend')
   const navigate = useNavigate()
   const { signOut } = useAuth()
-  const storedAccount = getStoredAccount()
-  const activeOrders = orders.filter((order) => order.isActive)
-  const previousOrders = orders.filter((order) => !order.isActive)
+  const toLocalePath = useLocalePath()
+  const allOrders = getAllOrders()
+  const activeOrders = allOrders.filter((order) => order.isActive)
+  const previousOrders = allOrders.filter((order) => !order.isActive)
   const [isEditingDetails, setIsEditingDetails] = useState(false)
-  const [profileDetails, setProfileDetails] = useState({
-    fullName: storedAccount ? `${storedAccount.firstName} ${storedAccount.lastName}` : '',
-    email: storedAccount?.email ?? '',
-    telephone: '+420 777 123 456',
-    company: 'SWI Customer',
-    street: 'Masarykova 12',
-    city: 'Ostrava',
-    zipCode: '702 00',
-    country: 'Czech Republic',
-  })
+  const [profileDetails, setProfileDetails] = useState(() => getStoredProfileDetails())
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: '',
   })
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteError, setDeleteError] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState('')
 
   const handleSignOut = () => {
     signOut()
-    navigate('/sign-in')
+    navigate(toLocalePath('/sign-in'))
+  }
+
+  const handleDeleteProfile = () => {
+    const currentAccount = getStoredAccount()
+
+    if (!currentAccount || deletePassword !== currentAccount.password) {
+      setDeleteError('Enter your correct password to delete your profile.')
+      return
+    }
+
+    deleteStoredProfile()
+    deleteStoredOrders()
+    signOut()
+    navigate(toLocalePath('/sign-in'))
   }
 
   const handlePasswordChange = (event: React.FormEvent<HTMLFormElement>) => {
@@ -135,6 +151,21 @@ export function ProfilePage() {
             className="grid gap-4 sm:grid-cols-2"
             onSubmit={(event) => {
               event.preventDefault()
+              saveStoredProfileDetails(profileDetails)
+
+              const currentAccount = getStoredAccount()
+
+              if (currentAccount) {
+                const [firstName, ...restName] = profileDetails.fullName.trim().split(/\s+/)
+
+                saveStoredAccount({
+                  ...currentAccount,
+                  firstName: firstName || currentAccount.firstName,
+                  lastName: restName.join(' ') || currentAccount.lastName,
+                  email: profileDetails.email.trim() || currentAccount.email,
+                })
+              }
+
               setIsEditingDetails(false)
             }}
           >
@@ -235,7 +266,7 @@ export function ProfilePage() {
                 Update password
               </button>
               <Link
-                to="/sign-in"
+                to={toLocalePath('/sign-in')}
                 onClick={(event) => {
                   event.preventDefault()
                   handleSignOut()
@@ -244,6 +275,17 @@ export function ProfilePage() {
               >
                 Sign off
               </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setDeletePassword('')
+                  setDeleteError('')
+                  setIsDeleteModalOpen(true)
+                }}
+                className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-medium text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
+              >
+                Delete profile
+              </button>
             </div>
           </form>
         </SectionCard>
@@ -265,11 +307,65 @@ export function ProfilePage() {
             {previousOrders.length > 0 ? (
               previousOrders.map((order) => <OrderCard key={order.id} order={order} />)
             ) : (
-              <EmptyOrderState message="Your completed orders will show up here after your first purchase." />
+              <EmptyOrderState message="After delivering your active order it will be shown here." />
             )}
           </div>
         </SectionCard>
       </div>
+
+      {isDeleteModalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-6 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-rose-200 bg-white p-6 shadow-2xl shadow-slate-900/20">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-rose-700">
+              Delete profile
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-slate-950">Are you sure?</h2>
+            <p className="mt-4 text-sm leading-6 text-slate-700">
+              This will delete your profile, saved account information, and saved orders. Enter your
+              password to confirm.
+            </p>
+
+            <label className="mt-5 grid gap-2">
+              <span className="text-sm font-medium text-slate-700">Password</span>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(event) => {
+                  setDeletePassword(event.target.value)
+                  setDeleteError('')
+                }}
+                placeholder="Enter your password"
+                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-rose-600 focus:bg-white"
+              />
+            </label>
+
+            {deleteError ? (
+              <p className="mt-3 text-sm font-medium text-rose-600">{deleteError}</p>
+            ) : null}
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteModalOpen(false)
+                  setDeletePassword('')
+                  setDeleteError('')
+                }}
+                className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteProfile}
+                className="rounded-full bg-rose-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-rose-800"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -342,9 +438,11 @@ function OrderCard({
   order: OrderRecord
   highlight?: boolean
 }) {
+  const toLocalePath = useLocalePath()
+
   return (
     <Link
-      to={`/profile/orders/${encodeURIComponent(order.id)}`}
+      to={toLocalePath(`/profile/orders/${encodeURIComponent(order.id)}`)}
       className={
         highlight
           ? 'block rounded-2xl border border-cyan-200 bg-cyan-50 px-5 py-5 transition hover:border-cyan-300 hover:bg-cyan-100'
@@ -369,6 +467,7 @@ function OrderCard({
 
       <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-700">
         <span>{order.itemsLabel}</span>
+        {order.deliveryCost ? <span>Delivery: {order.deliveryCost}</span> : null}
         <span>{order.total}</span>
         <span className="font-medium text-cyan-700">Open details</span>
       </div>

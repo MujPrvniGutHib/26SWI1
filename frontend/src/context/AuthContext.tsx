@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useMemo, useState, type PropsWithChildren } from 'react'
 
 type AuthContextValue = {
   isSignedIn: boolean
@@ -11,12 +12,9 @@ const AUTH_STORAGE_KEY = 'swi-auth-signed-in'
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [isSignedIn, setIsSignedIn] = useState(false)
-
-  useEffect(() => {
-    const savedValue = window.localStorage.getItem(AUTH_STORAGE_KEY)
-    setIsSignedIn(savedValue === 'true')
-  }, [])
+  const [isSignedIn, setIsSignedIn] = useState(
+    () => window.localStorage.getItem(AUTH_STORAGE_KEY) === 'true',
+  )
 
   const value = useMemo(
     () => ({
