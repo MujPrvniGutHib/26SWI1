@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
+import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 const categoryMap: Record<string, string> = {
@@ -167,6 +168,7 @@ const books = [
 
 export function CategoryBooksPage() {
   const { category } = useParams<{ category: string }>()
+  const { addToCart } = useCart()
   const categoryTitle = category ? categoryMap[category] : undefined
 
   useDocumentTitle(categoryTitle ? `${categoryTitle} | SWI Frontend` : 'Category | SWI Frontend')
@@ -174,6 +176,17 @@ export function CategoryBooksPage() {
   const filteredBooks = categoryTitle
     ? books.filter((book) => book.category === categoryTitle)
     : []
+
+  const handleAddToCart = (book: (typeof books)[number]) => {
+    addToCart({
+      title: book.title,
+      author: book.author,
+      category: book.category,
+      price: book.price,
+      coverUrl: book.coverUrl,
+      stock: book.stock,
+    })
+  }
 
   return (
     <div className="space-y-8">
@@ -226,12 +239,13 @@ export function CategoryBooksPage() {
                 </Link>
                 <div className="px-6 pb-5">
                   {book.stock > 0 ? (
-                    <Link
-                      to="/cart"
+                    <button
+                      type="button"
+                      onClick={() => handleAddToCart(book)}
                       className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                     >
                       Add to cart
-                    </Link>
+                    </button>
                   ) : (
                     <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
                       Not available

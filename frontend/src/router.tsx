@@ -9,7 +9,9 @@ import { CheckoutPage } from './pages/CheckoutPage'
 import { DiscountsPage } from './pages/DiscountsPage'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { OrderDetailsPage } from './pages/OrderDetailsPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { SignInPage } from './pages/SignInPage'
 
 export const router = createBrowserRouter([
@@ -55,6 +57,10 @@ export const router = createBrowserRouter([
         element: <SignInPage />,
       },
       {
+        path: 'reset-password',
+        element: <ResetPasswordPage />,
+      },
+      {
         path: 'login',
         element: <Navigate to="/sign-in" replace />,
       },
@@ -65,6 +71,10 @@ export const router = createBrowserRouter([
       {
         path: 'profile',
         element: <ProfilePage />,
+      },
+      {
+        path: 'profile/orders/:orderId',
+        element: <OrderDetailsPage />,
       },
       {
         path: '*',

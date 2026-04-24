@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
+import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 const books = [
@@ -143,6 +144,7 @@ const books = [
 
 export function BookDetailsPage() {
   const { bookId } = useParams()
+  const { addToCart } = useCart()
   const decodedTitle = bookId ? decodeURIComponent(bookId) : ''
   const book = books.find((b) => b.title === decodedTitle)
   useDocumentTitle(`${book?.title || 'Book Details'} | SWI Frontend`)
@@ -174,12 +176,22 @@ export function BookDetailsPage() {
             Back to catalog
           </Link>
           {book.stock > 0 ? (
-            <Link
-              to="/cart"
+            <button
+              type="button"
+              onClick={() => {
+                addToCart({
+                  title: book.title,
+                  author: book.author,
+                  category: book.category,
+                  price: book.price,
+                  coverUrl: book.coverUrl,
+                  stock: book.stock,
+                })
+              }}
               className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
             >
               Add to cart
-            </Link>
+            </button>
           ) : (
             <span className="rounded-full border border-slate-300 bg-slate-200 px-5 py-3 text-sm font-medium text-slate-500 cursor-not-allowed">
               Not available
@@ -189,7 +201,7 @@ export function BookDetailsPage() {
       </PageHero>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard title="Book Information">
+        <SectionCard eyebrow="Overview" title="Book Information">
           <div className="space-y-4">
             <div className="flex gap-6">
               <img
@@ -217,7 +229,7 @@ export function BookDetailsPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Details">
+        <SectionCard eyebrow="Specs" title="Details">
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-slate-600">Price:</span>

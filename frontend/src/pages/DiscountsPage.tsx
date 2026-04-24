@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
+import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 const books = [
@@ -134,8 +135,20 @@ const books = [
 
 export function DiscountsPage() {
   useDocumentTitle('Discounts | Find my book')
+  const { addToCart } = useCart()
 
   const discountedBooks = books.filter((book) => book.discountPercent > 0)
+
+  const handleAddToCart = (book: (typeof books)[number]) => {
+    addToCart({
+      title: book.title,
+      author: book.author,
+      category: book.category,
+      price: book.price,
+      coverUrl: book.coverUrl,
+      stock: book.stock,
+    })
+  }
 
   return (
     <div className="space-y-8">
@@ -189,12 +202,13 @@ export function DiscountsPage() {
               </Link>
               <div className="mt-4">
                 {book.stock > 0 ? (
-                  <Link
-                    to="/cart"
+                  <button
+                    type="button"
+                    onClick={() => handleAddToCart(book)}
                     className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                   >
                     Add to cart
-                  </Link>
+                  </button>
                 ) : (
                   <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
                     Not available

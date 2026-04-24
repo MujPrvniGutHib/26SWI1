@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { useCart } from '../context/CartContext'
 import { cn } from '../utils/cn'
 
 const navigation = [
@@ -11,7 +13,8 @@ const navigation = [
 
 export function AppShell() {
   const [searchQuery, setSearchQuery] = useState('')
-  const isSignedIn = false
+  const { isSignedIn } = useAuth()
+  const { cartMessage } = useCart()
   const navigate = useNavigate()
 
   const handleSearch = (e: React.FormEvent) => {
@@ -87,7 +90,12 @@ export function AppShell() {
           <Outlet />
         </div>
       </main>
+
+      {cartMessage ? (
+        <div className="pointer-events-none fixed bottom-6 right-6 z-50 rounded-2xl border border-cyan-200 bg-white/95 px-5 py-4 text-sm font-medium text-slate-900 shadow-lg shadow-cyan-100 backdrop-blur">
+          {cartMessage}
+        </div>
+      ) : null}
     </div>
   )
 }
-

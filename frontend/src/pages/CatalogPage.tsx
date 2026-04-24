@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
+import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 const categories = [
@@ -288,6 +289,7 @@ const formats = ['Hardcover book', 'E-book', 'Audiobook']
 export function CatalogPage() {
   useDocumentTitle('Catalog | SWI Frontend')
 
+  const { addToCart } = useCart()
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q') || ''
 
@@ -316,6 +318,17 @@ export function CatalogPage() {
   const isFiltersActive = searchQuery !== '' || age !== 18 || price !== 450 || length !== 240 || selectedAuthors.length > 0 || selectedFormats.length > 0
 
   const activeFilters = (age !== 18 ? 1 : 0) + (price !== 450 ? 1 : 0) + (length !== 240 ? 1 : 0) + selectedAuthors.length + selectedFormats.length
+
+  const handleAddToCart = (book: (typeof books)[number]) => {
+    addToCart({
+      title: book.title,
+      author: book.author,
+      category: book.category,
+      price: book.price,
+      coverUrl: book.coverUrl,
+      stock: book.stock,
+    })
+  }
 
   const filteredBooks = books.filter((book) => {
     const matchesSearch = !searchQuery || 
@@ -471,12 +484,13 @@ export function CatalogPage() {
                       </Link>
                       <div className="px-6 pb-5">
                         {book.stock > 0 ? (
-                          <Link
-                            to="/cart"
+                          <button
+                            type="button"
+                            onClick={() => handleAddToCart(book)}
                             className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                           >
                             Add to cart
-                          </Link>
+                          </button>
                         ) : (
                           <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
                             Not available
@@ -526,12 +540,13 @@ export function CatalogPage() {
                       </Link>
                       <div className="px-6 pb-5">
                         {book.stock > 0 ? (
-                          <Link
-                            to="/cart"
+                          <button
+                            type="button"
+                            onClick={() => handleAddToCart(book)}
                             className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                           >
                             Add to cart
-                          </Link>
+                          </button>
                         ) : (
                           <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
                             Not available
@@ -597,12 +612,13 @@ export function CatalogPage() {
                   </div>                </div>              </Link>
                 <div className="mt-2 pb-2">
                   {book.stock > 0 ? (
-                    <Link
-                      to="/cart"
+                    <button
+                      type="button"
+                      onClick={() => handleAddToCart(book)}
                       className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                     >
                       Add to cart
-                    </Link>
+                    </button>
                   ) : (
                     <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
                       Not available
@@ -623,4 +639,3 @@ export function CatalogPage() {
     </div>
   )
 }
-

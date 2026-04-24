@@ -31,8 +31,29 @@ export function AboutPage() {
           ))}
         </div>
       </SectionCard>
-    </div>
 
-    
+      <SectionCard eyebrow="Contact Us" title="Where can you find us?">
+        <div className="space-y-4 text-sm leading-7 text-slate-700">
+          <p>
+            <span className="font-semibold text-slate-950">Address:</span> Hlavni 128,
+            110 00 Prague, Czech Republic
+          </p>
+          <div>
+            <p className="font-semibold text-slate-950">Opening times:</p>
+            <p>Monday - 10:00 - 22:00</p>
+            <p>Tuesday - 10:00 - 22:00</p>
+            <p>Wednesday - 10:00 - 22:00</p>
+            <p>Thursday - 10:00 - 22:00</p>
+            <p>Friday - 10:00 - 22:00</p>
+            <p>Saturday - 10:00 - 22:00</p>
+            <p>Sunday - 10:00 - 22:00</p>
+          </div>
+          <p>
+            <span className="font-semibold text-slate-950">Contact our support:</span>{' '}
+            +420 734 581 209
+          </p>
+        </div>
+      </SectionCard>
+    </div>
   )
 }

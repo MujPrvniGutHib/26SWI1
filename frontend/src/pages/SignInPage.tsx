@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { PageHero } from '../components/PageHero'
+import { Link, useNavigate } from 'react-router-dom'
 import { SectionCard } from '../components/SectionCard'
+import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { getStoredAccount, saveStoredAccount } from '../utils/authStorage'
 import { cn } from '../utils/cn'
 
 type AuthTab = 'login' | 'register'
+
+const inputClassName =
+  'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white'
 
 const tabCopy: Record<
   AuthTab,
@@ -40,18 +44,15 @@ const tabCopy: Record<
 
 export function SignInPage() {
   const [activeTab, setActiveTab] = useState<AuthTab>('login')
+  const [profileMessage, setProfileMessage] = useState('')
+  const { isSignedIn, signIn } = useAuth()
+  const navigate = useNavigate()
   const copy = tabCopy[activeTab]
 
   useDocumentTitle('Sign In | SWI Frontend')
 
   return (
     <div className="space-y-6">
-      <PageHero
-        eyebrow="Authentication"
-        title="One place for login and registration"
-        description="Users can now switch between login and registration inside one shared auth screen instead of jumping between separate pages."
-      />
-
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="inline-flex rounded-full bg-slate-100 p-1">
@@ -84,7 +85,23 @@ export function SignInPage() {
             </p>
           </div>
 
-          {activeTab === 'login' ? <LoginForm /> : <RegisterForm />}
+          {activeTab === 'login' ? (
+            <LoginForm
+              onSuccess={() => {
+                signIn()
+                setProfileMessage('')
+                navigate('/profile')
+              }}
+            />
+          ) : (
+            <RegisterForm
+              onSuccess={() => {
+                signIn()
+                setProfileMessage('')
+                navigate('/profile')
+              }}
+            />
+          )}
 
           <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-slate-600">
             <span>{copy.footerText}</span>
@@ -117,6 +134,15 @@ export function SignInPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/profile"
+              onClick={(event) => {
+                if (!isSignedIn) {
+                  event.preventDefault()
+                  setProfileMessage('Not logged in.')
+                  return
+                }
+
+                setProfileMessage('')
+              }}
               className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
               View profile
@@ -128,21 +154,64 @@ export function SignInPage() {
               Read about us
             </Link>
           </div>
+
+          {profileMessage ? (
+            <p className="text-sm font-medium text-rose-600">{profileMessage}</p>
+          ) : null}
         </SectionCard>
       </div>
     </div>
   )
 }
 
-function LoginForm() {
+function LoginForm({ onSuccess }: { onSuccess: () => void }) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+
   return (
-    <form className="mt-8 grid gap-5">
+    <form
+      className="mt-8 grid gap-5"
+      onSubmit={(event) => {
+        event.preventDefault()
+        const normalizedEmail = email.trim().toLowerCase()
+        const storedAccount = getStoredAccount()
+
+        if (!normalizedEmail || !password) {
+          setError('Enter both your e-mail and password.')
+          return
+        }
+
+        if (!isValidEmail(normalizedEmail)) {
+          setError('Enter a valid e-mail address.')
+          return
+        }
+
+        if (!storedAccount) {
+          setError('No account found yet. Create one in the registration tab first.')
+          return
+        }
+
+        if (
+          normalizedEmail !== storedAccount.email.toLowerCase() ||
+          password !== storedAccount.password
+        ) {
+          setError('The e-mail or password is not correct.')
+          return
+        }
+
+        setError('')
+        onSuccess()
+      }}
+    >
       <label className="grid gap-2">
         <span className="text-sm font-medium text-slate-700">Email</span>
         <input
           type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
           placeholder="name@example.com"
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white"
+          className={inputClassName}
         />
       </label>
 
@@ -150,19 +219,22 @@ function LoginForm() {
         <span className="text-sm font-medium text-slate-700">Password</span>
         <input
           type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
           placeholder="Enter your password"
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white"
+          className={inputClassName}
         />
       </label>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">
-        <label className="flex items-center gap-2">
-          <input type="checkbox" className="h-4 w-4 rounded border-slate-300" />
-          Remember me
-        </label>
-        <button type="button" className="font-medium text-cyan-700 transition hover:text-cyan-800">
+      {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+
+      <div className="flex flex-wrap justify-start gap-3 text-sm text-slate-600">
+        <Link
+          to="/reset-password"
+          className="font-medium text-cyan-700 transition hover:text-cyan-800"
+        >
           Forgot password?
-        </button>
+        </Link>
       </div>
 
       <button
@@ -175,16 +247,74 @@ function LoginForm() {
   )
 }
 
-function RegisterForm() {
+function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    acceptedTerms: false,
+  })
+  const [error, setError] = useState('')
+
   return (
-    <form className="mt-8 grid gap-5">
+    <form
+      className="mt-8 grid gap-5"
+      onSubmit={(event) => {
+        event.preventDefault()
+        const normalizedEmail = form.email.trim().toLowerCase()
+
+        if (
+          !form.firstName.trim() ||
+          !form.lastName.trim() ||
+          !normalizedEmail ||
+          !form.password ||
+          !form.confirmPassword
+        ) {
+          setError('Fill in all required fields before creating the account.')
+          return
+        }
+
+        if (!isValidEmail(normalizedEmail)) {
+          setError('Enter a valid e-mail address.')
+          return
+        }
+
+        if (form.password.length < 8) {
+          setError('Password must have at least 8 characters.')
+          return
+        }
+
+        if (form.password !== form.confirmPassword) {
+          setError('Passwords do not match.')
+          return
+        }
+
+        if (!form.acceptedTerms) {
+          setError('You need to agree to the terms before creating the account.')
+          return
+        }
+
+        saveStoredAccount({
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
+          email: normalizedEmail,
+          password: form.password,
+        })
+        setError('')
+        onSuccess()
+      }}
+    >
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2">
           <span className="text-sm font-medium text-slate-700">First name</span>
           <input
             type="text"
+            value={form.firstName}
+            onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))}
             placeholder="Vojtech"
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white"
+            className={inputClassName}
           />
         </label>
 
@@ -192,8 +322,10 @@ function RegisterForm() {
           <span className="text-sm font-medium text-slate-700">Last name</span>
           <input
             type="text"
+            value={form.lastName}
+            onChange={(event) => setForm((current) => ({ ...current, lastName: event.target.value }))}
             placeholder="Szymiczek"
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white"
+            className={inputClassName}
           />
         </label>
       </div>
@@ -202,8 +334,10 @@ function RegisterForm() {
         <span className="text-sm font-medium text-slate-700">Email</span>
         <input
           type="email"
+          value={form.email}
+          onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
           placeholder="name@example.com"
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white"
+          className={inputClassName}
         />
       </label>
 
@@ -212,8 +346,10 @@ function RegisterForm() {
           <span className="text-sm font-medium text-slate-700">Password</span>
           <input
             type="password"
+            value={form.password}
+            onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
             placeholder="Create a password"
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white"
+            className={inputClassName}
           />
         </label>
 
@@ -221,16 +357,29 @@ function RegisterForm() {
           <span className="text-sm font-medium text-slate-700">Confirm password</span>
           <input
             type="password"
+            value={form.confirmPassword}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, confirmPassword: event.target.value }))
+            }
             placeholder="Repeat your password"
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white"
+            className={inputClassName}
           />
         </label>
       </div>
 
       <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-600">
-        <input type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300" />
+        <input
+          type="checkbox"
+          checked={form.acceptedTerms}
+          onChange={(event) =>
+            setForm((current) => ({ ...current, acceptedTerms: event.target.checked }))
+          }
+          className="mt-1 h-4 w-4 rounded border-slate-300"
+        />
         <span>I agree to the terms and want to create a bookstore account.</span>
       </label>
+
+      {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
 
       <button
         type="submit"
@@ -240,4 +389,8 @@ function RegisterForm() {
       </button>
     </form>
   )
+}
+
+function isValidEmail(value: string) {
+  return /\S+@\S+\.\S+/.test(value)
 }
