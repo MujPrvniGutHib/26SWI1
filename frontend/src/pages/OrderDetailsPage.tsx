@@ -3,29 +3,39 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { getAllOrders } from '../data/orders'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { useLocalePath } from '../utils/locale'
+import {
+  getLocalizedDeliveryMethod,
+  getLocalizedOrderStatus,
+  getLocalizedPaymentMethod,
+  getLocalizedTimelineNote,
+  formatCurrencyText,
+  useLocalePath,
+  useTranslation,
+} from '../utils/locale'
 
 export function OrderDetailsPage() {
+  const t = useTranslation()
   const { orderId } = useParams()
   const toLocalePath = useLocalePath()
   const decodedOrderId = orderId ? decodeURIComponent(orderId) : ''
   const order = getAllOrders().find((entry) => entry.id === decodedOrderId)
+  const localizedStatus = order ? getLocalizedOrderStatus(order.status, t) : ''
 
-  useDocumentTitle(`${order?.id || 'Order Details'} | SWI Frontend`)
+  useDocumentTitle(`${order?.id || t.orderDetailsPage.documentTitleFallback} | SWI Frontend`)
 
   if (!order) {
     return (
       <div className="space-y-6">
         <PageHero
-          eyebrow="Order Not Found"
-          title="Order not found"
-          description="We could not find the order you selected."
+          eyebrow={t.orderDetailsPage.notFound.eyebrow}
+          title={t.orderDetailsPage.notFound.title}
+          description={t.orderDetailsPage.notFound.description}
         >
           <Link
             to={toLocalePath('/profile')}
             className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
           >
-            Back to profile
+            {t.common.backToProfile}
           </Link>
         </PageHero>
       </div>
@@ -35,22 +45,29 @@ export function OrderDetailsPage() {
   return (
     <div className="space-y-6">
       <PageHero
-        eyebrow={order.isActive ? 'Active Order' : 'Past Order'}
+        eyebrow={
+          order.isActive
+            ? t.orderDetailsPage.hero.activeOrder
+            : t.orderDetailsPage.hero.pastOrder
+        }
         title={order.id}
-        description={`Placed on ${order.placedOn} • ${order.status}`}
+        description={`${t.orderDetailsPage.hero.placedOn} ${order.placedOn} - ${localizedStatus}`}
       >
         <div className="flex flex-wrap gap-3">
           <Link
             to={toLocalePath('/profile')}
             className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
           >
-            Back to profile
+            {t.common.backToProfile}
           </Link>
         </div>
       </PageHero>
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <SectionCard eyebrow="Items" title="Order contents">
+        <SectionCard
+          eyebrow={t.orderDetailsPage.contents.eyebrow}
+          title={t.orderDetailsPage.contents.title}
+        >
           <div className="grid gap-4">
             {order.items.map((item) => (
               <div
@@ -59,39 +76,71 @@ export function OrderDetailsPage() {
               >
                 <div>
                   <p className="text-sm font-semibold text-slate-950">{item.title}</p>
-                  <p className="mt-1 text-sm text-slate-600">Quantity: {item.quantity}</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {t.orderDetailsPage.contents.quantity} {item.quantity}
+                  </p>
                 </div>
-                <p className="text-sm font-medium text-slate-900">{item.price}</p>
+                <p className="text-sm font-medium text-slate-900">
+                  {formatCurrencyText(item.price, t)}
+                </p>
               </div>
             ))}
           </div>
         </SectionCard>
 
-        <SectionCard eyebrow="Summary" title="Order details">
+        <SectionCard
+          eyebrow={t.orderDetailsPage.summary.eyebrow}
+          title={t.orderDetailsPage.summary.title}
+        >
           <div className="space-y-3 text-sm text-slate-700">
-            <DetailRow label="Status" value={order.status} />
-            <DetailRow label="Placed on" value={order.placedOn} />
-            <DetailRow label="Items" value={order.itemsLabel} />
-            {order.deliveryCost ? <DetailRow label="Delivery cost" value={order.deliveryCost} /> : null}
-            <DetailRow label="Total" value={order.total} />
-            <DetailRow label="Delivery" value={order.deliveryMethod} />
-            <DetailRow label="Payment" value={order.paymentMethod} />
+            <DetailRow label={t.orderDetailsPage.summary.status} value={localizedStatus} />
+            <DetailRow label={t.orderDetailsPage.summary.placedOn} value={order.placedOn} />
+            <DetailRow label={t.orderDetailsPage.summary.items} value={order.itemsLabel} />
+            {order.deliveryCost ? (
+              <DetailRow
+                label={t.orderDetailsPage.summary.deliveryCost}
+                value={formatCurrencyText(order.deliveryCost, t)}
+              />
+            ) : null}
+            <DetailRow
+              label={t.orderDetailsPage.summary.total}
+              value={formatCurrencyText(order.total, t)}
+            />
+            <DetailRow
+              label={t.orderDetailsPage.summary.delivery}
+              value={getLocalizedDeliveryMethod(order.deliveryMethod, t)}
+            />
+            <DetailRow
+              label={t.orderDetailsPage.summary.payment}
+              value={getLocalizedPaymentMethod(order.paymentMethod, t)}
+            />
           </div>
         </SectionCard>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <SectionCard eyebrow="Shipping" title="Delivery address">
+        <SectionCard
+          eyebrow={t.orderDetailsPage.shipping.eyebrow}
+          title={t.orderDetailsPage.shipping.title}
+        >
           <p className="text-sm leading-7 text-slate-700">{order.shippingAddress}</p>
         </SectionCard>
 
-        <SectionCard eyebrow="Billing" title="Billing address">
+        <SectionCard
+          eyebrow={t.orderDetailsPage.billing.eyebrow}
+          title={t.orderDetailsPage.billing.title}
+        >
           <p className="text-sm leading-7 text-slate-700">{order.billingAddress}</p>
         </SectionCard>
       </div>
 
-      <SectionCard eyebrow="Timeline" title="Order progress">
-        <p className="text-sm leading-7 text-slate-700">{order.timelineNote}</p>
+      <SectionCard
+        eyebrow={t.orderDetailsPage.timeline.eyebrow}
+        title={t.orderDetailsPage.timeline.title}
+      >
+        <p className="text-sm leading-7 text-slate-700">
+          {getLocalizedTimelineNote(order.timelineNote, t)}
+        </p>
       </SectionCard>
     </div>
   )

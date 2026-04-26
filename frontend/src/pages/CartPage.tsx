@@ -3,10 +3,11 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { useLocalePath } from '../utils/locale'
+import { formatCurrency, getLocalizedCategory, useLocalePath, useTranslation } from '../utils/locale'
 
 export function CartPage() {
-  useDocumentTitle('Cart | SWI Frontend')
+  const t = useTranslation()
+  useDocumentTitle(t.cartPage.documentTitle)
   const { cartItems, updateQuantity, removeItem } = useCart()
   const toLocalePath = useLocalePath()
 
@@ -15,12 +16,12 @@ export function CartPage() {
   return (
     <div className="space-y-6">
       <PageHero
-        eyebrow="Cart"
-        title={cartItems.length > 0 ? 'Woah thats a lot of books!' : 'Your cart is empty'}
+        eyebrow={t.cartPage.hero.eyebrow}
+        title={cartItems.length > 0 ? t.cartPage.hero.fullTitle : t.cartPage.hero.emptyTitle}
         description={
           cartItems.length > 0
-            ? "It's our pleasure to send you your books. Just click the button below to continue to checkout and finalize your order."
-            : 'Add books from the catalog and they will appear here once you put them into the cart.'
+            ? t.cartPage.hero.fullDescription
+            : t.cartPage.hero.emptyDescription
         }
       >
         <div className="flex flex-wrap gap-3">
@@ -28,20 +29,20 @@ export function CartPage() {
             to={toLocalePath('/catalog')}
             className="inline-flex rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
           >
-            Back to catalog
+            {t.common.backToCatalog}
           </Link>
           {cartItems.length > 0 ? (
             <Link
               to={toLocalePath('/checkout')}
               className="inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              Continue to checkout
+              {t.cartPage.hero.continueToCheckout}
             </Link>
           ) : null}
         </div>
       </PageHero>
 
-      <SectionCard eyebrow="Cart State" title="Your books">
+      <SectionCard eyebrow={t.cartPage.section.eyebrow} title={t.cartPage.section.title}>
         {cartItems.length > 0 ? (
           <div className="space-y-4">
             {cartItems.map((item) => (
@@ -52,7 +53,7 @@ export function CartPage() {
                 <Link to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)} className="shrink-0">
                   <img
                     src={item.book.coverUrl}
-                    alt={`${item.book.title} cover`}
+                    alt={`${item.book.title} ${t.catalogPage.bookCard.coverSuffix}`}
                     className="h-24 w-18 rounded-lg object-cover shadow-sm"
                   />
                 </Link>
@@ -61,7 +62,7 @@ export function CartPage() {
                     to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)}
                     className="text-sm font-semibold uppercase tracking-wide text-cyan-700 hover:underline"
                   >
-                    {item.book.category}
+                    {getLocalizedCategory(item.book.category, t)}
                   </Link>
                   <Link
                     to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)}
@@ -70,7 +71,9 @@ export function CartPage() {
                     {item.book.title}
                   </Link>
                   <p className="text-sm text-slate-600">{item.book.author}</p>
-                  <p className="mt-1 font-medium text-slate-900">{item.book.price} Kc</p>
+                  <p className="mt-1 font-medium text-slate-900">
+                    {formatCurrency(item.book.price, t)}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
@@ -95,26 +98,26 @@ export function CartPage() {
                     onClick={() => removeItem(item.book.title)}
                     className="text-sm text-red-600 hover:underline"
                   >
-                    Remove
+                    {t.common.remove}
                   </button>
                 </div>
               </div>
             ))}
             <div className="mt-6 flex justify-end border-t border-slate-200 pt-4">
               <div className="text-right">
-                <p className="text-sm text-slate-600">Total:</p>
-                <p className="text-2xl font-semibold text-slate-950">{total} Kc</p>
+                <p className="text-sm text-slate-600">{t.common.total}:</p>
+                <p className="text-2xl font-semibold text-slate-950">{formatCurrency(total, t)}</p>
               </div>
             </div>
           </div>
         ) : (
           <div className="py-8 text-center">
-            <p className="text-slate-600">Your cart is empty.</p>
+            <p className="text-slate-600">{t.cartPage.section.emptyMessage}</p>
             <Link
               to={toLocalePath('/catalog')}
               className="mt-4 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              Browse catalog
+              {t.common.browseCatalog}
             </Link>
           </div>
         )}

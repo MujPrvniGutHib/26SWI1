@@ -5,53 +5,23 @@ import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { getStoredAccount, saveStoredAccount } from '../utils/authStorage'
 import { cn } from '../utils/cn'
-import { useLocalePath } from '../utils/locale'
+import { useLocalePath, useTranslation } from '../utils/locale'
 
 type AuthTab = 'login' | 'register'
 
 const inputClassName =
   'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white'
 
-const tabCopy: Record<
-  AuthTab,
-  {
-    eyebrow: string
-    title: string
-    description: string
-    buttonLabel: string
-    footerText: string
-    footerAction: string
-  }
-> = {
-  login: {
-    eyebrow: 'Welcome Back',
-    title: 'Log in to continue shopping',
-    description:
-      'Access your cart, profile, and past orders from one place. This starter form is ready to connect to your backend later.',
-    buttonLabel: 'Log in',
-    footerText: "Don't have an account yet?",
-    footerAction: 'Create one',
-  },
-  register: {
-    eyebrow: 'New Here',
-    title: 'Create your bookstore account',
-    description:
-      'Save your details, track orders, and make checkout faster. This starter form is ready for your registration endpoint.',
-    buttonLabel: 'Create account',
-    footerText: 'Already registered?',
-    footerAction: 'Log in',
-  },
-}
-
 export function SignInPage() {
+  const t = useTranslation()
   const [activeTab, setActiveTab] = useState<AuthTab>('login')
   const [profileMessage, setProfileMessage] = useState('')
   const { isSignedIn, signIn } = useAuth()
   const navigate = useNavigate()
   const toLocalePath = useLocalePath()
-  const copy = tabCopy[activeTab]
+  const copy = activeTab === 'login' ? t.signInPage.login : t.signInPage.register
 
-  useDocumentTitle('Sign In | SWI Frontend')
+  useDocumentTitle(t.signInPage.documentTitle)
 
   return (
     <div className="space-y-6">
@@ -70,7 +40,7 @@ export function SignInPage() {
                     : 'text-slate-600 hover:text-slate-950',
                 )}
               >
-                {tab === 'login' ? 'Log In' : 'Register'}
+                {tab === 'login' ? t.signInPage.tabs.logIn : t.signInPage.tabs.register}
               </button>
             ))}
           </div>
@@ -117,13 +87,12 @@ export function SignInPage() {
           </div>
         </section>
 
-        <SectionCard eyebrow="Why Sign In" title="Make your life easier">
+        <SectionCard
+          eyebrow={t.signInPage.whySignIn.eyebrow}
+          title={t.signInPage.whySignIn.title}
+        >
           <div className="grid gap-3">
-            {[
-              'Look at your orders old or active.',
-              'You don’t have to write anything in checkout.',
-              'Each month you can win a ticket for 100Kč off your order.',
-            ].map((item) => (
+            {t.signInPage.whySignIn.items.map((item) => (
               <div
                 key={item}
                 className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-700"
@@ -139,7 +108,7 @@ export function SignInPage() {
               onClick={(event) => {
                 if (!isSignedIn) {
                   event.preventDefault()
-                  setProfileMessage('Not logged in.')
+                  setProfileMessage(t.signInPage.whySignIn.notLoggedIn)
                   return
                 }
 
@@ -147,13 +116,13 @@ export function SignInPage() {
               }}
               className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              View profile
+              {t.signInPage.whySignIn.viewProfile}
             </Link>
             <Link
               to={toLocalePath('/about')}
               className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
             >
-              Read about us
+              {t.signInPage.whySignIn.readAboutUs}
             </Link>
           </div>
 
@@ -167,6 +136,7 @@ export function SignInPage() {
 }
 
 function LoginForm({ onSuccess }: { onSuccess: () => void }) {
+  const t = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -181,17 +151,17 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         const storedAccount = getStoredAccount()
 
         if (!normalizedEmail || !password) {
-          setError('Enter both your e-mail and password.')
+          setError(t.signInPage.loginForm.missingCredentials)
           return
         }
 
         if (!isValidEmail(normalizedEmail)) {
-          setError('Enter a valid e-mail address.')
+          setError(t.signInPage.loginForm.invalidEmail)
           return
         }
 
         if (!storedAccount) {
-          setError('No account found yet. Create one in the registration tab first.')
+          setError(t.signInPage.loginForm.noAccountFound)
           return
         }
 
@@ -199,7 +169,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           normalizedEmail !== storedAccount.email.toLowerCase() ||
           password !== storedAccount.password
         ) {
-          setError('The e-mail or password is not correct.')
+          setError(t.signInPage.loginForm.wrongCredentials)
           return
         }
 
@@ -208,7 +178,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
       }}
     >
       <label className="grid gap-2">
-        <span className="text-sm font-medium text-slate-700">Email</span>
+        <span className="text-sm font-medium text-slate-700">{t.signInPage.loginForm.email}</span>
         <input
           type="email"
           value={email}
@@ -219,12 +189,14 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
       </label>
 
       <label className="grid gap-2">
-        <span className="text-sm font-medium text-slate-700">Password</span>
+        <span className="text-sm font-medium text-slate-700">
+          {t.signInPage.loginForm.password}
+        </span>
         <input
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          placeholder="Enter your password"
+          placeholder={t.signInPage.loginForm.passwordPlaceholder}
           className={inputClassName}
         />
       </label>
@@ -236,7 +208,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           to={toLocalePath('/reset-password')}
           className="font-medium text-cyan-700 transition hover:text-cyan-800"
         >
-          Forgot password?
+          {t.signInPage.loginForm.forgotPassword}
         </Link>
       </div>
 
@@ -244,13 +216,14 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         type="submit"
         className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
       >
-        Log in
+        {t.signInPage.login.buttonLabel}
       </button>
     </form>
   )
 }
 
 function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
+  const t = useTranslation()
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -275,27 +248,27 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           !form.password ||
           !form.confirmPassword
         ) {
-          setError('Fill in all required fields before creating the account.')
+          setError(t.signInPage.registerForm.missingFields)
           return
         }
 
         if (!isValidEmail(normalizedEmail)) {
-          setError('Enter a valid e-mail address.')
+          setError(t.signInPage.registerForm.invalidEmail)
           return
         }
 
         if (form.password.length < 8) {
-          setError('Password must have at least 8 characters.')
+          setError(t.signInPage.registerForm.shortPassword)
           return
         }
 
         if (form.password !== form.confirmPassword) {
-          setError('Passwords do not match.')
+          setError(t.signInPage.registerForm.passwordMismatch)
           return
         }
 
         if (!form.acceptedTerms) {
-          setError('You need to agree to the terms before creating the account.')
+          setError(t.signInPage.registerForm.termsRequired)
           return
         }
 
@@ -311,22 +284,30 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-slate-700">First name</span>
+          <span className="text-sm font-medium text-slate-700">
+            {t.signInPage.registerForm.firstName}
+          </span>
           <input
             type="text"
             value={form.firstName}
-            onChange={(event) => setForm((current) => ({ ...current, firstName: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, firstName: event.target.value }))
+            }
             placeholder="Vojtech"
             className={inputClassName}
           />
         </label>
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-slate-700">Last name</span>
+          <span className="text-sm font-medium text-slate-700">
+            {t.signInPage.registerForm.lastName}
+          </span>
           <input
             type="text"
             value={form.lastName}
-            onChange={(event) => setForm((current) => ({ ...current, lastName: event.target.value }))}
+            onChange={(event) =>
+              setForm((current) => ({ ...current, lastName: event.target.value }))
+            }
             placeholder="Szymiczek"
             className={inputClassName}
           />
@@ -334,7 +315,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       <label className="grid gap-2">
-        <span className="text-sm font-medium text-slate-700">Email</span>
+        <span className="text-sm font-medium text-slate-700">{t.signInPage.registerForm.email}</span>
         <input
           type="email"
           value={form.email}
@@ -346,25 +327,31 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-slate-700">Password</span>
+          <span className="text-sm font-medium text-slate-700">
+            {t.signInPage.registerForm.password}
+          </span>
           <input
             type="password"
             value={form.password}
-            onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-            placeholder="Create a password"
+            onChange={(event) =>
+              setForm((current) => ({ ...current, password: event.target.value }))
+            }
+            placeholder={t.signInPage.registerForm.passwordPlaceholder}
             className={inputClassName}
           />
         </label>
 
         <label className="grid gap-2">
-          <span className="text-sm font-medium text-slate-700">Confirm password</span>
+          <span className="text-sm font-medium text-slate-700">
+            {t.signInPage.registerForm.confirmPassword}
+          </span>
           <input
             type="password"
             value={form.confirmPassword}
             onChange={(event) =>
               setForm((current) => ({ ...current, confirmPassword: event.target.value }))
             }
-            placeholder="Repeat your password"
+            placeholder={t.signInPage.registerForm.confirmPasswordPlaceholder}
             className={inputClassName}
           />
         </label>
@@ -379,7 +366,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           }
           className="mt-1 h-4 w-4 rounded border-slate-300"
         />
-        <span>I agree to the terms and want to create a bookstore account.</span>
+        <span>{t.signInPage.registerForm.terms}</span>
       </label>
 
       {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
@@ -388,7 +375,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         type="submit"
         className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
       >
-        Create account
+        {t.signInPage.register.buttonLabel}
       </button>
     </form>
   )

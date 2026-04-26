@@ -4,12 +4,13 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { getStoredAccount, saveStoredAccount } from '../utils/authStorage'
-import { useLocalePath } from '../utils/locale'
+import { useLocalePath, useTranslation } from '../utils/locale'
 
 const inputClassName =
   'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-700 focus:bg-white'
 
 export function ResetPasswordPage() {
+  const t = useTranslation()
   const [email, setEmail] = useState('')
   const [verifiedEmail, setVerifiedEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -19,7 +20,7 @@ export function ResetPasswordPage() {
   const navigate = useNavigate()
   const toLocalePath = useLocalePath()
 
-  useDocumentTitle('Reset Password | SWI Frontend')
+  useDocumentTitle(t.resetPasswordPage.documentTitle)
 
   const handleEmailSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -27,17 +28,17 @@ export function ResetPasswordPage() {
     const storedAccount = getStoredAccount()
 
     if (!normalizedEmail) {
-      setError('Enter your e-mail address first.')
+      setError(t.resetPasswordPage.errors.missingEmail)
       return
     }
 
     if (!isValidEmail(normalizedEmail)) {
-      setError('Enter a valid e-mail address.')
+      setError(t.resetPasswordPage.errors.invalidEmail)
       return
     }
 
     if (!storedAccount || storedAccount.email.toLowerCase() !== normalizedEmail) {
-      setError('No account was found for this e-mail address.')
+      setError(t.resetPasswordPage.errors.noAccount)
       return
     }
 
@@ -51,22 +52,22 @@ export function ResetPasswordPage() {
     const storedAccount = getStoredAccount()
 
     if (!storedAccount || storedAccount.email.toLowerCase() !== verifiedEmail) {
-      setError('This account is no longer available. Try the recovery process again.')
+      setError(t.resetPasswordPage.errors.unavailableAccount)
       return
     }
 
     if (!newPassword || !confirmPassword) {
-      setError('Fill in both password fields.')
+      setError(t.resetPasswordPage.errors.missingPasswords)
       return
     }
 
     if (newPassword.length < 8) {
-      setError('New password must have at least 8 characters.')
+      setError(t.resetPasswordPage.errors.shortPassword)
       return
     }
 
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.')
+      setError(t.resetPasswordPage.errors.passwordMismatch)
       return
     }
 
@@ -75,7 +76,7 @@ export function ResetPasswordPage() {
       password: newPassword,
     })
     setError('')
-    setSuccess('Password updated successfully. You can now sign in with your new password.')
+    setSuccess(t.resetPasswordPage.success)
     setNewPassword('')
     setConfirmPassword('')
   }
@@ -83,23 +84,28 @@ export function ResetPasswordPage() {
   return (
     <div className="space-y-6">
       <PageHero
-        eyebrow="Password Recovery"
-        title="Restore your password"
-        description="Confirm your account e-mail first, then choose a new password for your sign-in."
+        eyebrow={t.resetPasswordPage.hero.eyebrow}
+        title={t.resetPasswordPage.hero.title}
+        description={t.resetPasswordPage.hero.description}
       >
         <Link
           to={toLocalePath('/sign-in')}
           className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
         >
-          Back to sign in
+          {t.resetPasswordPage.hero.backToSignIn}
         </Link>
       </PageHero>
 
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <SectionCard eyebrow="Step 1" title="Verify your e-mail">
+        <SectionCard
+          eyebrow={t.resetPasswordPage.stepOne.eyebrow}
+          title={t.resetPasswordPage.stepOne.title}
+        >
           <form className="grid gap-5" onSubmit={handleEmailSubmit}>
             <label className="grid gap-2">
-              <span className="text-sm font-medium text-slate-700">E-mail</span>
+              <span className="text-sm font-medium text-slate-700">
+                {t.resetPasswordPage.stepOne.email}
+              </span>
               <input
                 type="email"
                 value={email}
@@ -116,20 +122,26 @@ export function ResetPasswordPage() {
               type="submit"
               className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              Verify e-mail
+              {t.resetPasswordPage.stepOne.verifyEmail}
             </button>
           </form>
         </SectionCard>
 
-        <SectionCard eyebrow="Step 2" title="Set a new password">
+        <SectionCard
+          eyebrow={t.resetPasswordPage.stepTwo.eyebrow}
+          title={t.resetPasswordPage.stepTwo.title}
+        >
           {verifiedEmail ? (
             <form className="grid gap-5" onSubmit={handlePasswordSubmit}>
               <div className="rounded-2xl border border-cyan-100 bg-cyan-50 px-4 py-4 text-sm leading-6 text-slate-700">
-                Verified account: <span className="font-medium">{verifiedEmail}</span>
+                {t.resetPasswordPage.stepTwo.verifiedAccount}{' '}
+                <span className="font-medium">{verifiedEmail}</span>
               </div>
 
               <label className="grid gap-2">
-                <span className="text-sm font-medium text-slate-700">New password</span>
+                <span className="text-sm font-medium text-slate-700">
+                  {t.resetPasswordPage.stepTwo.newPassword}
+                </span>
                 <input
                   type="password"
                   value={newPassword}
@@ -138,13 +150,15 @@ export function ResetPasswordPage() {
                     setError('')
                     setSuccess('')
                   }}
-                  placeholder="Enter your new password"
+                  placeholder={t.resetPasswordPage.stepTwo.newPasswordPlaceholder}
                   className={inputClassName}
                 />
               </label>
 
               <label className="grid gap-2">
-                <span className="text-sm font-medium text-slate-700">Confirm new password</span>
+                <span className="text-sm font-medium text-slate-700">
+                  {t.resetPasswordPage.stepTwo.confirmNewPassword}
+                </span>
                 <input
                   type="password"
                   value={confirmPassword}
@@ -153,7 +167,7 @@ export function ResetPasswordPage() {
                     setError('')
                     setSuccess('')
                   }}
-                  placeholder="Repeat your new password"
+                  placeholder={t.resetPasswordPage.stepTwo.confirmNewPasswordPlaceholder}
                   className={inputClassName}
                 />
               </label>
@@ -163,20 +177,20 @@ export function ResetPasswordPage() {
                   type="submit"
                   className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
                 >
-                  Save new password
+                  {t.resetPasswordPage.stepTwo.saveNewPassword}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate(toLocalePath('/sign-in'))}
                   className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                 >
-                  Go to sign in
+                  {t.resetPasswordPage.stepTwo.goToSignIn}
                 </button>
               </div>
             </form>
           ) : (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-6 text-sm leading-6 text-slate-600">
-              Enter a valid registered e-mail on the left before you can create a new password.
+              {t.resetPasswordPage.stepTwo.waitingForEmail}
             </div>
           )}
         </SectionCard>

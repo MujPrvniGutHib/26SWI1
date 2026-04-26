@@ -81,7 +81,7 @@ export function CartProvider({ children }: PropsWithChildren) {
 
           return [...current, { book, quantity: 1 }]
         })
-        setCartMessage(`Added "${book.title}" to cart.`)
+        setCartMessage(book.title)
       },
       updateQuantity: (title: string, delta: number) => {
         setCartItems((current) =>

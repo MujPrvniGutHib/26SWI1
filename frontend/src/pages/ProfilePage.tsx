@@ -12,10 +12,18 @@ import {
   saveStoredAccount,
   saveStoredProfileDetails,
 } from '../utils/authStorage'
-import { useLocalePath } from '../utils/locale'
+import {
+  getLocalizedCountry,
+  getLocalizedDeliveryMethod,
+  getLocalizedOrderStatus,
+  formatCurrencyText,
+  useLocalePath,
+  useTranslation,
+} from '../utils/locale'
 
 export function ProfilePage() {
-  useDocumentTitle('Profile | SWI Frontend')
+  const t = useTranslation()
+  useDocumentTitle(t.profilePage.documentTitle)
   const navigate = useNavigate()
   const { signOut } = useAuth()
   const toLocalePath = useLocalePath()
@@ -44,7 +52,7 @@ export function ProfilePage() {
     const currentAccount = getStoredAccount()
 
     if (!currentAccount || deletePassword !== currentAccount.password) {
-      setDeleteError('Enter your correct password to delete your profile.')
+      setDeleteError(t.profilePage.security.errors.deleteWrongPassword)
       return
     }
 
@@ -60,7 +68,7 @@ export function ProfilePage() {
 
     if (!currentAccount) {
       setPasswordSuccess('')
-      setPasswordError('No saved account was found. Please register again.')
+      setPasswordError(t.profilePage.security.errors.noSavedAccount)
       return
     }
 
@@ -70,25 +78,25 @@ export function ProfilePage() {
       !passwordForm.confirmNewPassword
     ) {
       setPasswordSuccess('')
-      setPasswordError('Fill in all password fields first.')
+      setPasswordError(t.profilePage.security.errors.missingFields)
       return
     }
 
     if (passwordForm.currentPassword !== currentAccount.password) {
       setPasswordSuccess('')
-      setPasswordError('Current password is not correct.')
+      setPasswordError(t.profilePage.security.errors.wrongCurrentPassword)
       return
     }
 
     if (passwordForm.newPassword.length < 8) {
       setPasswordSuccess('')
-      setPasswordError('New password must have at least 8 characters.')
+      setPasswordError(t.profilePage.security.errors.shortPassword)
       return
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
       setPasswordSuccess('')
-      setPasswordError('New passwords do not match.')
+      setPasswordError(t.profilePage.security.errors.passwordMismatch)
       return
     }
 
@@ -102,21 +110,21 @@ export function ProfilePage() {
       confirmNewPassword: '',
     })
     setPasswordError('')
-    setPasswordSuccess('Password updated. You can now sign in with the new password after signing off.')
+    setPasswordSuccess(t.profilePage.security.success)
   }
 
   return (
     <div className="space-y-6">
       <PageHero
-        eyebrow="Profile"
-        title="Your account overview"
-        description="Check your contact details, billing information, password settings, and order progress in one place."
+        eyebrow={t.profilePage.hero.eyebrow}
+        title={t.profilePage.hero.title}
+        description={t.profilePage.hero.description}
       />
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <SectionCard
-          eyebrow="Account Details"
-          title="Personal and billing information"
+          eyebrow={t.profilePage.accountDetails.eyebrow}
+          title={t.profilePage.accountDetails.title}
           actions={
             isEditingDetails ? (
               <div className="flex flex-wrap gap-3">
@@ -125,14 +133,14 @@ export function ProfilePage() {
                   form="profile-details-form"
                   className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
                 >
-                  Save changes
+                  {t.profilePage.accountDetails.saveChanges}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsEditingDetails(false)}
                   className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                 >
-                  Cancel
+                  {t.common.cancel}
                 </button>
               </div>
             ) : (
@@ -141,7 +149,7 @@ export function ProfilePage() {
                 onClick={() => setIsEditingDetails(true)}
                 className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
-                Edit information
+                {t.profilePage.accountDetails.editInformation}
               </button>
             )
           }
@@ -170,61 +178,62 @@ export function ProfilePage() {
             }}
           >
             <ProfileField
-              label="Full name"
+              label={t.profilePage.accountDetails.fields.fullName}
               value={profileDetails.fullName}
               isEditing={isEditingDetails}
               onChange={(value) => setProfileDetails((current) => ({ ...current, fullName: value }))}
             />
             <ProfileField
-              label="E-mail"
+              label={t.profilePage.accountDetails.fields.email}
               value={profileDetails.email}
               isEditing={isEditingDetails}
               onChange={(value) => setProfileDetails((current) => ({ ...current, email: value }))}
             />
             <ProfileField
-              label="Telephone"
+              label={t.profilePage.accountDetails.fields.telephone}
               value={profileDetails.telephone}
               isEditing={isEditingDetails}
               onChange={(value) => setProfileDetails((current) => ({ ...current, telephone: value }))}
             />
             <ProfileField
-              label="Company"
+              label={t.profilePage.accountDetails.fields.company}
               value={profileDetails.company}
               isEditing={isEditingDetails}
               onChange={(value) => setProfileDetails((current) => ({ ...current, company: value }))}
             />
             <ProfileField
-              label="Street and number"
+              label={t.profilePage.accountDetails.fields.streetAndNumber}
               value={profileDetails.street}
               isEditing={isEditingDetails}
               onChange={(value) => setProfileDetails((current) => ({ ...current, street: value }))}
             />
             <ProfileField
-              label="City"
+              label={t.profilePage.accountDetails.fields.city}
               value={profileDetails.city}
               isEditing={isEditingDetails}
               onChange={(value) => setProfileDetails((current) => ({ ...current, city: value }))}
             />
             <ProfileField
-              label="ZIP code"
+              label={t.profilePage.accountDetails.fields.zipCode}
               value={profileDetails.zipCode}
               isEditing={isEditingDetails}
               onChange={(value) => setProfileDetails((current) => ({ ...current, zipCode: value }))}
             />
             <ProfileField
-              label="Country"
+              label={t.profilePage.accountDetails.fields.country}
               value={profileDetails.country}
+              displayValue={getLocalizedCountry(profileDetails.country, t)}
               isEditing={isEditingDetails}
               onChange={(value) => setProfileDetails((current) => ({ ...current, country: value }))}
             />
           </form>
         </SectionCard>
 
-        <SectionCard eyebrow="Security" title="Change password">
+        <SectionCard eyebrow={t.profilePage.security.eyebrow} title={t.profilePage.security.title}>
           <form className="grid gap-5" onSubmit={handlePasswordChange}>
             <PasswordField
-              label="Current password"
-              placeholder="Enter your current password"
+              label={t.profilePage.security.currentPassword}
+              placeholder={t.profilePage.security.currentPasswordPlaceholder}
               value={passwordForm.currentPassword}
               onChange={(value) => {
                 setPasswordForm((current) => ({ ...current, currentPassword: value }))
@@ -233,8 +242,8 @@ export function ProfilePage() {
               }}
             />
             <PasswordField
-              label="New password"
-              placeholder="Enter a new password"
+              label={t.profilePage.security.newPassword}
+              placeholder={t.profilePage.security.newPasswordPlaceholder}
               value={passwordForm.newPassword}
               onChange={(value) => {
                 setPasswordForm((current) => ({ ...current, newPassword: value }))
@@ -243,8 +252,8 @@ export function ProfilePage() {
               }}
             />
             <PasswordField
-              label="Confirm new password"
-              placeholder="Repeat the new password"
+              label={t.profilePage.security.confirmNewPassword}
+              placeholder={t.profilePage.security.confirmNewPasswordPlaceholder}
               value={passwordForm.confirmNewPassword}
               onChange={(value) => {
                 setPasswordForm((current) => ({ ...current, confirmNewPassword: value }))
@@ -263,7 +272,7 @@ export function ProfilePage() {
                 type="submit"
                 className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
               >
-                Update password
+                {t.profilePage.security.updatePassword}
               </button>
               <Link
                 to={toLocalePath('/sign-in')}
@@ -273,7 +282,7 @@ export function ProfilePage() {
                 }}
                 className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
-                Sign off
+                {t.profilePage.security.signOff}
               </Link>
               <button
                 type="button"
@@ -284,7 +293,7 @@ export function ProfilePage() {
                 }}
                 className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-medium text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
               >
-                Delete profile
+                {t.profilePage.security.deleteProfile}
               </button>
             </div>
           </form>
@@ -292,22 +301,28 @@ export function ProfilePage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <SectionCard eyebrow="Orders" title="Active order">
+        <SectionCard
+          eyebrow={t.profilePage.orders.activeEyebrow}
+          title={t.profilePage.orders.activeTitle}
+        >
           <div className="grid gap-4">
             {activeOrders.length > 0 ? (
               activeOrders.map((order) => <OrderCard key={order.id} order={order} highlight />)
             ) : (
-              <EmptyOrderState message="You do not have any active orders yet." />
+              <EmptyOrderState message={t.profilePage.orders.emptyActive} />
             )}
           </div>
         </SectionCard>
 
-        <SectionCard eyebrow="Order History" title="Old orders">
+        <SectionCard
+          eyebrow={t.profilePage.orders.historyEyebrow}
+          title={t.profilePage.orders.historyTitle}
+        >
           <div className="grid gap-4">
             {previousOrders.length > 0 ? (
               previousOrders.map((order) => <OrderCard key={order.id} order={order} />)
             ) : (
-              <EmptyOrderState message="After delivering your active order it will be shown here." />
+              <EmptyOrderState message={t.profilePage.orders.emptyHistory} />
             )}
           </div>
         </SectionCard>
@@ -317,16 +332,17 @@ export function ProfilePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-6 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-3xl border border-rose-200 bg-white p-6 shadow-2xl shadow-slate-900/20">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-rose-700">
-              Delete profile
+              {t.profilePage.deleteModal.eyebrow}
             </p>
-            <h2 className="mt-3 text-2xl font-semibold text-slate-950">Are you sure?</h2>
+            <h2 className="mt-3 text-2xl font-semibold text-slate-950">
+              {t.profilePage.deleteModal.title}
+            </h2>
             <p className="mt-4 text-sm leading-6 text-slate-700">
-              This will delete your profile, saved account information, and saved orders. Enter your
-              password to confirm.
+              {t.profilePage.deleteModal.description}
             </p>
 
             <label className="mt-5 grid gap-2">
-              <span className="text-sm font-medium text-slate-700">Password</span>
+              <span className="text-sm font-medium text-slate-700">{t.common.password}</span>
               <input
                 type="password"
                 value={deletePassword}
@@ -334,7 +350,7 @@ export function ProfilePage() {
                   setDeletePassword(event.target.value)
                   setDeleteError('')
                 }}
-                placeholder="Enter your password"
+                placeholder={t.profilePage.deleteModal.passwordPlaceholder}
                 className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-rose-600 focus:bg-white"
               />
             </label>
@@ -353,14 +369,14 @@ export function ProfilePage() {
                 }}
                 className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
-                Cancel
+                {t.common.cancel}
               </button>
               <button
                 type="button"
                 onClick={handleDeleteProfile}
                 className="rounded-full bg-rose-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-rose-800"
               >
-                Delete
+                {t.common.delete}
               </button>
             </div>
           </div>
@@ -373,11 +389,13 @@ export function ProfilePage() {
 function ProfileField({
   label,
   value,
+  displayValue,
   isEditing = false,
   onChange,
 }: {
   label: string
   value: string
+  displayValue?: string
   isEditing?: boolean
   onChange?: (value: string) => void
 }) {
@@ -392,7 +410,7 @@ function ProfileField({
           className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-cyan-700"
         />
       ) : (
-        <p className="mt-2 text-sm font-medium text-slate-900">{value}</p>
+        <p className="mt-2 text-sm font-medium text-slate-900">{displayValue ?? value}</p>
       )}
     </div>
   )
@@ -438,6 +456,7 @@ function OrderCard({
   order: OrderRecord
   highlight?: boolean
 }) {
+  const t = useTranslation()
   const toLocalePath = useLocalePath()
 
   return (
@@ -452,7 +471,9 @@ function OrderCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-slate-950">{order.id}</p>
-          <p className="mt-1 text-sm text-slate-600">Placed on {order.placedOn}</p>
+          <p className="mt-1 text-sm text-slate-600">
+            {t.profilePage.orders.placedOn} {order.placedOn}
+          </p>
         </div>
         <span
           className={
@@ -461,15 +482,22 @@ function OrderCard({
               : 'rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-700'
           }
         >
-          {order.status}
+          {getLocalizedOrderStatus(order.status, t)}
         </span>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-700">
         <span>{order.itemsLabel}</span>
-        {order.deliveryCost ? <span>Delivery: {order.deliveryCost}</span> : null}
-        <span>{order.total}</span>
-        <span className="font-medium text-cyan-700">Open details</span>
+        {order.deliveryCost ? (
+          <span>
+            {t.profilePage.orders.delivery} {formatCurrencyText(order.deliveryCost, t)}
+            {order.deliveryMethod ? ` (${getLocalizedDeliveryMethod(order.deliveryMethod, t)})` : ''}
+          </span>
+        ) : null}
+        <span>
+          {t.profilePage.orders.totalPrice} {formatCurrencyText(order.total, t)}
+        </span>
+        <span className="font-medium text-cyan-700">{t.profilePage.orders.openDetails}</span>
       </div>
     </Link>
   )

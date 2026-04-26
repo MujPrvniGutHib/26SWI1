@@ -7,10 +7,11 @@ import { useCart } from '../context/CartContext'
 import { saveStoredOrder } from '../data/orders'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { getStoredProfileDetails } from '../utils/authStorage'
-import { useLocalePath } from '../utils/locale'
+import { formatCurrency, getLocalizedCategory, useLocalePath, useTranslation } from '../utils/locale'
 
 export function CheckoutPage() {
-  useDocumentTitle('Checkout | SWI Frontend')
+  const t = useTranslation()
+  useDocumentTitle(t.checkoutPage.documentTitle)
   const { cartItems, clearCart } = useCart()
   const { isSignedIn } = useAuth()
   const toLocalePath = useLocalePath()
@@ -53,11 +54,11 @@ export function CheckoutPage() {
   const [purchaseMessage, setPurchaseMessage] = useState('')
   const [isPurchaseSubmitted, setIsPurchaseSubmitted] = useState(false)
 
-  const billingOptions = ['Cash', 'Online card payment', 'Pay on delivery']
+  const billingOptions = t.checkoutPage.billingOptions
   const deliveryOptions = [
     {
-      label: 'Home delivery',
-      address: checkoutDetails.address || 'Your checkout address',
+      label: t.checkoutPage.deliveryOptions.homeDelivery,
+      address: checkoutDetails.address || t.checkoutPage.deliveryOptions.checkoutAddress,
       price: 150,
     },
     {
@@ -79,7 +80,7 @@ export function CheckoutPage() {
     checkoutDetails.telephone.trim() !== '' &&
     checkoutDetails.address.trim() !== ''
   const isCardDetailsReady =
-    billingOption !== 'Online card payment' ||
+    billingOption !== t.checkoutPage.billingOptions[1] ||
     (/^\d{16}$/.test(cardDetails.cardNumber.replace(/\s/g, '')) &&
       /^(0[1-9]|1[0-2])\/\d{2}$/.test(cardDetails.validUntil) &&
       /^\d{3}$/.test(cardDetails.cvc))
@@ -114,31 +115,39 @@ export function CheckoutPage() {
 
       saveStoredOrder({
         id: `ORD-${Date.now()}`,
-        status: 'Preparing',
+        status: t.checkoutPage.order.preparing,
         placedOn,
-        total: `${orderTotal} Kc`,
-        itemsLabel: `${itemCount} ${itemCount === 1 ? 'book' : 'books'}`,
-        deliveryCost: `${selectedDeliveryPrice} Kc`,
+        total: `${orderTotal} Kč`,
+        itemsLabel: `${itemCount} ${
+          itemCount === 1 ? t.checkoutPage.order.book : t.checkoutPage.order.books
+        }`,
+        deliveryCost: `${selectedDeliveryPrice} Kč`,
         deliveryMethod: deliveryOption,
         paymentMethod: billingOption,
         shippingAddress: selectedDeliveryAddress,
         billingAddress: checkoutDetails.address,
-        timelineNote: `Thanks for your purchase. Your order should be delivered in ${deliveryDays} ${
-          deliveryDays === 1 ? 'day' : 'days'
-        }.`,
+        timelineNote: t.checkoutPage.order.thanksTimeline
+          .replace('{days}', String(deliveryDays))
+          .replace(
+            '{dayWord}',
+            deliveryDays === 1 ? t.checkoutPage.order.day : t.checkoutPage.order.days,
+          ),
         isActive: true,
         items: cartItems.map((item) => ({
           title: item.book.title,
           quantity: item.quantity,
-          price: `${item.book.price * item.quantity} Kc`,
+          price: `${item.book.price * item.quantity} Kč`,
         })),
       })
     }
 
     setPurchaseMessage(
-      `Thank you for your purchase and we are happy you chose us. Your order will be delivered in ${deliveryDays} ${
-        deliveryDays === 1 ? 'day' : 'days'
-      }.`,
+      t.checkoutPage.order.thankYouPurchase
+        .replace('{days}', String(deliveryDays))
+        .replace(
+          '{dayWord}',
+          deliveryDays === 1 ? t.checkoutPage.order.day : t.checkoutPage.order.days,
+        ),
     )
     clearCart()
   }
@@ -146,16 +155,20 @@ export function CheckoutPage() {
   return (
     <div className="space-y-6">
       <PageHero
-        eyebrow="Checkout"
-        title={cartItems.length > 0 ? 'Review your order' : 'Your cart is empty'}
+        eyebrow={t.checkoutPage.hero.eyebrow}
+        title={
+          cartItems.length > 0
+            ? t.checkoutPage.hero.reviewTitle
+            : t.checkoutPage.hero.emptyTitle
+        }
         description={
           cartItems.length > 0
-            ? 'Check the books in your cart before completing shipping and payment.'
-            : 'Add books from the catalog before continuing to checkout.'
+            ? t.checkoutPage.hero.reviewDescription
+            : t.checkoutPage.hero.emptyDescription
         }
       />
 
-      <SectionCard eyebrow="Order Review" title="Books in your cart">
+      <SectionCard eyebrow={t.checkoutPage.review.eyebrow} title={t.checkoutPage.review.title}>
         {cartItems.length > 0 ? (
           <div className="space-y-4">
             {cartItems.map((item) => {
@@ -169,7 +182,7 @@ export function CheckoutPage() {
                   <Link to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)} className="shrink-0">
                     <img
                       src={item.book.coverUrl}
-                      alt={`${item.book.title} cover`}
+                      alt={`${item.book.title} ${t.catalogPage.bookCard.coverSuffix}`}
                       className="h-24 w-18 rounded-lg object-cover shadow-sm"
                     />
                   </Link>
@@ -178,7 +191,7 @@ export function CheckoutPage() {
                       to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)}
                       className="text-sm font-semibold uppercase tracking-wide text-cyan-700 hover:underline"
                     >
-                      {item.book.category}
+                      {getLocalizedCategory(item.book.category, t)}
                     </Link>
                     <Link
                       to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)}
@@ -188,12 +201,14 @@ export function CheckoutPage() {
                     </Link>
                     <p className="text-sm text-slate-600">{item.book.author}</p>
                     <p className="mt-1 text-sm text-slate-600">
-                      {item.quantity} x {item.book.price} Kc
+                      {item.quantity} x {formatCurrency(item.book.price, t)}
                     </p>
                   </div>
                   <div className="text-left sm:text-right">
-                    <p className="text-sm text-slate-600">Subtotal</p>
-                    <p className="text-xl font-semibold text-slate-950">{itemSubtotal} Kc</p>
+                    <p className="text-sm text-slate-600">{t.common.subtotal}</p>
+                    <p className="text-xl font-semibold text-slate-950">
+                      {formatCurrency(itemSubtotal, t)}
+                    </p>
                   </div>
                 </div>
               )
@@ -201,29 +216,35 @@ export function CheckoutPage() {
 
             <div className="mt-6 flex justify-end border-t border-slate-200 pt-4">
               <div className="text-right">
-                <p className="text-sm text-slate-600">Books subtotal:</p>
-                <p className="text-lg font-semibold text-slate-950">{itemsTotal} Kc</p>
+                <p className="text-sm text-slate-600">{t.checkoutPage.review.booksSubtotal}</p>
+                <p className="text-lg font-semibold text-slate-950">
+                  {formatCurrency(itemsTotal, t)}
+                </p>
                 {isDeliveryPriceApplied ? (
                   <>
-                    <p className="mt-3 text-sm text-slate-600">Delivery ({deliveryOption}):</p>
+                    <p className="mt-3 text-sm text-slate-600">
+                      {t.checkoutPage.review.delivery} ({deliveryOption}):
+                    </p>
                     <p className="text-lg font-semibold text-slate-950">
-                      {selectedDeliveryPrice} Kc
+                      {formatCurrency(selectedDeliveryPrice, t)}
                     </p>
                   </>
                 ) : null}
-                <p className="mt-3 text-sm text-slate-600">Order total:</p>
-                <p className="text-2xl font-semibold text-slate-950">{orderTotal} Kc</p>
+                <p className="mt-3 text-sm text-slate-600">{t.checkoutPage.review.orderTotal}</p>
+                <p className="text-2xl font-semibold text-slate-950">
+                  {formatCurrency(orderTotal, t)}
+                </p>
               </div>
             </div>
           </div>
         ) : (
           <div className="py-8 text-center">
-            <p className="text-slate-600">There are no books in your cart yet.</p>
+            <p className="text-slate-600">{t.checkoutPage.review.emptyMessage}</p>
             <Link
               to={toLocalePath('/catalog')}
               className="mt-4 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              Browse catalog
+              {t.common.browseCatalog}
             </Link>
           </div>
         )}
@@ -233,21 +254,21 @@ export function CheckoutPage() {
         <SectionCard
           eyebrow={
             checkoutStep === 'details'
-              ? 'Customer Details'
+              ? t.checkoutPage.steps.customerDetails
               : checkoutStep === 'delivery'
-                ? 'Delivery Options'
+                ? t.checkoutPage.steps.deliveryOptions
                 : checkoutStep === 'billing'
-                  ? 'Billing Options'
-                  : 'Checkout Overview'
+                  ? t.checkoutPage.steps.billingOptions
+                  : t.checkoutPage.steps.checkoutOverview
           }
           title={
             checkoutStep === 'details'
-              ? 'Start checkout'
+              ? t.checkoutPage.steps.startCheckout
               : checkoutStep === 'delivery'
-                ? 'Choose delivery method'
+                ? t.checkoutPage.steps.chooseDeliveryMethod
                 : checkoutStep === 'billing'
-                  ? 'Choose payment method'
-                  : 'Check your information'
+                  ? t.checkoutPage.steps.choosePaymentMethod
+                  : t.checkoutPage.steps.checkYourInformation
           }
         >
           {checkoutStep === 'details' ? (
@@ -264,7 +285,7 @@ export function CheckoutPage() {
             >
               <div>
                 <label htmlFor="checkout-name" className="text-sm font-medium text-slate-700">
-                  Name
+                  {t.checkoutPage.form.name}
                 </label>
                 <input
                   id="checkout-name"
@@ -274,14 +295,14 @@ export function CheckoutPage() {
                   onChange={(event) =>
                     setCheckoutDetails((current) => ({ ...current, name: event.target.value }))
                   }
-                  placeholder="Your name"
+                  placeholder={t.checkoutPage.form.namePlaceholder}
                   className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
               <div>
                 <label htmlFor="checkout-email" className="text-sm font-medium text-slate-700">
-                  E-mail
+                  {t.checkoutPage.form.email}
                 </label>
                 <input
                   id="checkout-email"
@@ -298,7 +319,7 @@ export function CheckoutPage() {
 
               <div>
                 <label htmlFor="checkout-telephone" className="text-sm font-medium text-slate-700">
-                  Telephone number
+                  {t.checkoutPage.form.telephone}
                 </label>
                 <input
                   id="checkout-telephone"
@@ -315,7 +336,7 @@ export function CheckoutPage() {
 
               <div className="md:col-span-2">
                 <label htmlFor="checkout-address" className="text-sm font-medium text-slate-700">
-                  Address
+                  {t.checkoutPage.form.address}
                 </label>
                 <textarea
                   id="checkout-address"
@@ -324,7 +345,7 @@ export function CheckoutPage() {
                   onChange={(event) =>
                     setCheckoutDetails((current) => ({ ...current, address: event.target.value }))
                   }
-                  placeholder="Street, city, ZIP code"
+                  placeholder={t.checkoutPage.form.addressPlaceholder}
                   rows={3}
                   className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
                 />
@@ -336,7 +357,7 @@ export function CheckoutPage() {
                   disabled={!isCustomerDetailsReady}
                   className={primaryButtonClassName}
                 >
-                  Start checkout
+                  {t.checkoutPage.steps.startCheckout}
                 </button>
               </div>
             </form>
@@ -357,7 +378,7 @@ export function CheckoutPage() {
                     <span className="block font-medium">{option.label}</span>
                     <span className="mt-1 block text-slate-600">{option.address}</span>
                     <span className="mt-1 block font-medium text-slate-950">
-                      + {option.price} Kc
+                      + {formatCurrency(option.price, t)}
                     </span>
                   </span>
                 </label>
@@ -368,7 +389,7 @@ export function CheckoutPage() {
                   onClick={() => setCheckoutStep('details')}
                   className="inline-flex rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                 >
-                  Back
+                  {t.common.back}
                 </button>
                 <button
                   type="button"
@@ -376,7 +397,7 @@ export function CheckoutPage() {
                   disabled={deliveryOption === ''}
                   className={primaryButtonClassName}
                 >
-                  Continue to billing
+                  {t.checkoutPage.form.continueToBilling}
                 </button>
               </div>
             </div>
@@ -397,11 +418,11 @@ export function CheckoutPage() {
                 </label>
               ))}
 
-              {billingOption === 'Online card payment' ? (
+              {billingOption === t.checkoutPage.billingOptions[1] ? (
                 <div className="grid gap-4 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 md:grid-cols-3">
                   <div className="md:col-span-3">
                     <label htmlFor="card-number" className="text-sm font-medium text-slate-700">
-                      Card number
+                      {t.checkoutPage.form.cardNumber}
                     </label>
                     <input
                       id="card-number"
@@ -428,7 +449,7 @@ export function CheckoutPage() {
 
                   <div className="md:col-span-2">
                     <label htmlFor="card-validity" className="text-sm font-medium text-slate-700">
-                      Day of validity
+                      {t.checkoutPage.form.dayOfValidity}
                     </label>
                     <input
                       id="card-validity"
@@ -482,7 +503,7 @@ export function CheckoutPage() {
                 onClick={() => setCheckoutStep('delivery')}
                 className="mt-2 inline-flex rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
-                Back
+                {t.common.back}
               </button>
 
               <button
@@ -491,7 +512,7 @@ export function CheckoutPage() {
                 disabled={billingOption === '' || !isCardDetailsReady}
                 className={`${primaryButtonClassName} ml-3 mt-2`}
               >
-                Continue to overview
+                {t.checkoutPage.form.continueToOverview}
               </button>
             </div>
           ) : (
@@ -499,23 +520,23 @@ export function CheckoutPage() {
               <div className="grid gap-4 lg:grid-cols-3">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    Customer
+                    {t.checkoutPage.form.customer}
                   </p>
                   <div className="mt-3 space-y-2 text-sm text-slate-700">
                     <p>
-                      <span className="font-medium text-slate-950">Name:</span>{' '}
+                      <span className="font-medium text-slate-950">{t.checkoutPage.form.name}:</span>{' '}
                       {checkoutDetails.name}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-950">E-mail:</span>{' '}
+                      <span className="font-medium text-slate-950">{t.checkoutPage.form.email}:</span>{' '}
                       {checkoutDetails.email}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-950">Telephone:</span>{' '}
+                      <span className="font-medium text-slate-950">{t.checkoutPage.form.telephone}:</span>{' '}
                       {checkoutDetails.telephone}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-950">Address:</span>{' '}
+                      <span className="font-medium text-slate-950">{t.checkoutPage.form.address}:</span>{' '}
                       {checkoutDetails.address}
                     </p>
                   </div>
@@ -523,39 +544,39 @@ export function CheckoutPage() {
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    Delivery
+                    {t.checkoutPage.form.delivery}
                   </p>
                   <div className="mt-3 space-y-2 text-sm text-slate-700">
                     <p>
-                      <span className="font-medium text-slate-950">Method:</span> {deliveryOption}
+                      <span className="font-medium text-slate-950">{t.checkoutPage.form.method}</span> {deliveryOption}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-950">Delivery address:</span>{' '}
+                      <span className="font-medium text-slate-950">{t.checkoutPage.form.deliveryAddress}</span>{' '}
                       {selectedDeliveryAddress}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-950">Delivery price:</span>{' '}
-                      {selectedDeliveryPrice} Kc
+                      <span className="font-medium text-slate-950">{t.checkoutPage.form.deliveryPrice}</span>{' '}
+                      {formatCurrency(selectedDeliveryPrice, t)}
                     </p>
                   </div>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                    Billing
+                    {t.checkoutPage.form.billing}
                   </p>
                   <div className="mt-3 space-y-2 text-sm text-slate-700">
                     <p>
-                      <span className="font-medium text-slate-950">Payment:</span> {billingOption}
+                      <span className="font-medium text-slate-950">{t.checkoutPage.form.payment}</span> {billingOption}
                     </p>
-                    {billingOption === 'Online card payment' ? (
+                    {billingOption === t.checkoutPage.billingOptions[1] ? (
                       <>
                         <p>
-                          <span className="font-medium text-slate-950">Card:</span>{' '}
+                          <span className="font-medium text-slate-950">{t.checkoutPage.form.card}</span>{' '}
                           {maskedCardNumber}
                         </p>
                         <p>
-                          <span className="font-medium text-slate-950">Valid until:</span>{' '}
+                          <span className="font-medium text-slate-950">{t.checkoutPage.form.validUntil}</span>{' '}
                           {cardDetails.validUntil}
                         </p>
                         <p>
@@ -574,7 +595,7 @@ export function CheckoutPage() {
                   disabled={isPurchaseSubmitted}
                   className="inline-flex rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
                 >
-                  Back
+                  {t.common.back}
                 </button>
                 <button
                   type="button"
@@ -582,7 +603,7 @@ export function CheckoutPage() {
                   disabled={!isCheckoutReady || isPurchaseSubmitted}
                   className="inline-flex rounded-full bg-cyan-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:hover:bg-slate-300"
                 >
-                  Buy
+                  {t.common.buy}
                 </button>
               </div>
             </div>
@@ -596,15 +617,17 @@ export function CheckoutPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">
-                  Purchase complete
+                  {t.checkoutPage.modal.eyebrow}
                 </p>
-                <h2 className="mt-3 text-2xl font-semibold text-slate-950">Thank you</h2>
+                <h2 className="mt-3 text-2xl font-semibold text-slate-950">
+                  {t.checkoutPage.modal.title}
+                </h2>
               </div>
               <button
                 type="button"
                 onClick={() => setPurchaseMessage('')}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-lg leading-none text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
-                aria-label="Close purchase message"
+                aria-label={t.common.closePurchaseMessage}
               >
                 x
               </button>
@@ -617,14 +640,14 @@ export function CheckoutPage() {
                 to={toLocalePath('/')}
                 className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
               >
-                Home
+                {t.common.home}
               </Link>
               {isSignedIn ? (
                 <Link
                   to={toLocalePath('/profile')}
                   className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                 >
-                  Profile
+                  {t.common.profile}
                 </Link>
               ) : null}
             </div>

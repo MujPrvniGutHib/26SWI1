@@ -1,21 +1,24 @@
 import { Link } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useLocalePath, useTranslation } from '../utils/locale'
 
 export function NotFoundPage() {
-  useDocumentTitle('Not Found | SWI Frontend')
+  const t = useTranslation()
+  const toLocalePath = useLocalePath()
+  useDocumentTitle(t.notFoundPage.documentTitle)
 
   return (
     <PageHero
-      eyebrow="404"
-      title="This page does not exist"
-      description="The route you tried is not defined yet. Head back to the catalog and continue from there."
+      eyebrow={t.notFoundPage.eyebrow}
+      title={t.notFoundPage.title}
+      description={t.notFoundPage.description}
     >
       <Link
-        to="/catalog"
+        to={toLocalePath('/catalog')}
         className="inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
       >
-        Go to catalog
+        {t.notFoundPage.goToCatalog}
       </Link>
     </PageHero>
   )

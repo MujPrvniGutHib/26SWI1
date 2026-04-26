@@ -2,37 +2,29 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { useLocalePath } from '../utils/locale'
+import { useLocalePath, useTranslation } from '../utils/locale'
 
 const featureCards = [
   {
-    eyebrow: 'Catalog',
-    title: 'Explore books',
-    description: 'Search by title, author, or genre and discover your next favorite book.',
-    action: 'Open catalog',
+    translationKey: 'catalog',
     to: '/catalog',
     icon: 'book',
   },
   {
-    eyebrow: 'Account',
-    title: 'Sign in or register',
-    description: 'Save your information for easy access, track orders, and get personalized picks.',
-    action: 'Open sign in',
+    translationKey: 'account',
     to: '/sign-in',
     icon: 'user',
   },
   {
-    eyebrow: 'About us',
-    title: 'Our story',
-    description: 'Learn what makes our bookstore different and why we love books.',
-    action: 'Open about us',
+    translationKey: 'about',
     to: '/about',
     icon: 'shop',
   },
-]
+] as const
 
 export function HomePage() {
-  useDocumentTitle('Home | SWI Frontend')
+  const t = useTranslation()
+  useDocumentTitle(t.homePage.documentTitle)
   const [catalogSearch, setCatalogSearch] = useState('')
   const navigate = useNavigate()
   const toLocalePath = useLocalePath()
@@ -52,20 +44,19 @@ export function HomePage() {
         <div className="grid overflow-hidden rounded-3xl bg-white lg:grid-cols-[0.82fr_1.18fr]">
           <div className="relative z-10 flex flex-col justify-center px-6 py-10 sm:px-8 lg:px-10 lg:py-16">
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">
-              Home
+              {t.homePage.eyebrow}
             </p>
             <h1 className="mt-6 max-w-md text-5xl font-semibold leading-tight tracking-tight text-slate-950">
-              Find your next great read.
+              {t.homePage.title}
             </h1>
             <p className="mt-6 max-w-lg text-lg leading-8 text-slate-600">
-              Browse curated books across fiction, fantasy, business, self-development, and more.
-              Simple recommendations, clear categories, and books worth your time.
+              {t.homePage.description}
             </p>
             <Link
               to={toLocalePath('/catalog')}
               className="mt-9 inline-flex w-fit rounded-full bg-slate-950 px-7 py-4 text-base font-semibold text-white transition hover:bg-slate-800"
             >
-              Browse catalog
+              {t.homePage.browseCatalog}
             </Link>
           </div>
 
@@ -83,30 +74,35 @@ export function HomePage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {featureCards.map((card) => (
+        {featureCards.map((card) => {
+          const cardText = t.homePage.cards[card.translationKey]
+
+          return (
           <section
-            key={card.title}
+            key={card.translationKey}
             className="rounded-3xl border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/60"
           >
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">
-              {card.eyebrow}
+              {cardText.eyebrow}
             </p>
             <h2 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950">
-              {card.title}
+              {cardText.title}
             </h2>
-            <p className="mt-4 min-h-16 text-base leading-7 text-slate-600">{card.description}</p>
+            <p className="mt-4 min-h-16 text-base leading-7 text-slate-600">
+              {cardText.description}
+            </p>
             <div className="mt-6 flex items-center justify-between gap-4">
               {card.to === '/catalog' ? (
                 <form onSubmit={handleCatalogSearch} className="min-w-0 flex-1">
                   <label htmlFor="home-catalog-search" className="sr-only">
-                    Search catalog
+                    {t.homePage.cards.catalog.searchLabel}
                   </label>
                   <input
                     id="home-catalog-search"
                     type="search"
                     value={catalogSearch}
                     onChange={(event) => setCatalogSearch(event.target.value)}
-                    placeholder="Search books, authors or genres"
+                    placeholder={t.homePage.cards.catalog.searchPlaceholder}
                     className="w-full rounded-full border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200"
                   />
                 </form>
@@ -115,7 +111,7 @@ export function HomePage() {
                   to={toLocalePath(card.to)}
                   className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-900 transition hover:border-slate-400 hover:bg-slate-50"
                 >
-                  {card.action}
+                  {cardText.action}
                 </Link>
               )}
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-cyan-700">
@@ -123,7 +119,8 @@ export function HomePage() {
               </div>
             </div>
           </section>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

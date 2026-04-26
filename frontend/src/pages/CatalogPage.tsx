@@ -4,7 +4,13 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { useLocalePath } from '../utils/locale'
+import {
+  formatCurrency,
+  getLocalizedCategory,
+  getLocalizedFormat,
+  useLocalePath,
+  useTranslation,
+} from '../utils/locale'
 
 const categories = [
   {
@@ -459,12 +465,18 @@ function normalizeSearchText(value: string) {
 }
 
 export function CatalogPage() {
-  useDocumentTitle('Catalog | SWI Frontend')
+  const t = useTranslation()
+  useDocumentTitle(t.catalogPage.documentTitle)
 
   const { addToCart } = useCart()
   const [searchParams] = useSearchParams()
   const toLocalePath = useLocalePath()
   const searchQuery = searchParams.get('q') || ''
+  const localizedCategories = categories.map((category, index) => ({
+    ...category,
+    title: t.categories[index]?.title ?? category.title,
+    description: t.categories[index]?.description ?? category.description,
+  }))
 
   const [age, setAge] = useState(DEFAULT_AGE)
   const [price, setPrice] = useState(DEFAULT_PRICE)
@@ -529,18 +541,22 @@ export function CatalogPage() {
   return (
     <div className="space-y-8">
       <PageHero
-        eyebrow="Catalog"
-        title="Explore our book collection"
-        description="Choose a genre, set filters by age, price or book length, and find authors that interest you."
+        eyebrow={t.catalogPage.hero.eyebrow}
+        title={t.catalogPage.hero.title}
+        description={t.catalogPage.hero.description}
       />
 
       <div className="grid gap-8 items-start xl:grid-cols-[250px_minmax(0,1fr)_280px]">
-        <SectionCard eyebrow="Filters" title="Narrow selection" actions={<span className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">Active: {activeFilters}</span>}>
+        <SectionCard
+          eyebrow={t.catalogPage.filters.eyebrow}
+          title={t.catalogPage.filters.title}
+          actions={<span className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">{t.catalogPage.filters.active}: {activeFilters}</span>}
+        >
           <div className="space-y-8">
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm font-medium text-slate-700">
-                <span>Age</span>
-                <span>{age} years</span>
+                <span>{t.catalogPage.filters.age}</span>
+                <span>{age} {t.catalogPage.filters.years}</span>
               </div>
               <input
                 type="range"
@@ -561,8 +577,8 @@ export function CatalogPage() {
 
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm font-medium text-slate-700">
-                <span>Price</span>
-                <span>{price} Kč</span>
+                <span>{t.catalogPage.filters.price}</span>
+                <span>{formatCurrency(price, t)}</span>
               </div>
               <input
                 type="range"
@@ -576,15 +592,15 @@ export function CatalogPage() {
                 className="w-full accent-cyan-600"
               />
               <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>{catalogPriceRange.min} Kč</span>
-                <span>{catalogPriceRange.max} Kč</span>
+                <span>{formatCurrency(catalogPriceRange.min, t)}</span>
+                <span>{formatCurrency(catalogPriceRange.max, t)}</span>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm font-medium text-slate-700">
-                <span>Length</span>
-                <span>{length} pages</span>
+                <span>{t.catalogPage.filters.length}</span>
+                <span>{length} {t.catalogPage.filters.pages}</span>
               </div>
               <input
                 type="range"
@@ -598,13 +614,13 @@ export function CatalogPage() {
                 className="w-full accent-cyan-600"
               />
               <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>{catalogLengthRange.min} pages</span>
-                <span>{catalogLengthRange.max} pages</span>
+                <span>{catalogLengthRange.min} {t.catalogPage.filters.pages}</span>
+                <span>{catalogLengthRange.max} {t.catalogPage.filters.pages}</span>
               </div>
             </div>
 
             <div className="space-y-4">
-              <div className="text-sm font-medium text-slate-700">From author</div>
+              <div className="text-sm font-medium text-slate-700">{t.catalogPage.filters.fromAuthor}</div>
               <div className="space-y-3 rounded-3xl border border-slate-200 bg-slate-50 p-4">
                 {authors.map((author) => (
                   <label key={author} className="flex cursor-pointer items-center gap-3 text-sm text-slate-700">
@@ -621,7 +637,7 @@ export function CatalogPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="text-sm font-medium text-slate-700">Book form</div>
+              <div className="text-sm font-medium text-slate-700">{t.catalogPage.filters.bookForm}</div>
               <div className="space-y-3 rounded-3xl border border-slate-200 bg-slate-50 p-4">
                 {formats.map((format) => (
                   <label key={format} className="flex cursor-pointer items-center gap-3 text-sm text-slate-700">
@@ -631,7 +647,7 @@ export function CatalogPage() {
                       onChange={() => toggleFormat(format)}
                       className="h-4 w-4 rounded border-slate-300 accent-cyan-600"
                     />
-                    <span>{format}</span>
+                    <span>{getLocalizedFormat(format, t)}</span>
                   </label>
                 ))}
               </div>
@@ -642,14 +658,14 @@ export function CatalogPage() {
         <div className="space-y-6">
           {searchQuery ? (
             <SectionCard
-              eyebrow="Search"
-              title={`Results for "${searchQuery}"`}
+              eyebrow={t.catalogPage.search.eyebrow}
+              title={`${t.catalogPage.search.resultsFor} "${searchQuery}"`}
               actions={
                 <Link
                   to={toLocalePath('/catalog')}
                   className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                 >
-                  Back to genres
+                  {t.catalogPage.search.backToGenres}
                 </Link>
               }
             >
@@ -660,11 +676,13 @@ export function CatalogPage() {
                       <Link to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
                         <img
                           src={book.coverUrl}
-                          alt={`${book.title} cover`}
+                          alt={`${book.title} ${t.catalogPage.bookCard.coverSuffix}`}
                           className="h-32 w-24 rounded-lg object-cover shadow-sm"
                         />
                         <div className="flex-1 flex flex-col gap-1.5">
-                          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{book.category}</p>
+                          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">
+                            {getLocalizedCategory(book.category, t)}
+                          </p>
                           <h2 className="text-lg font-semibold text-slate-950">{book.title}</h2>
                           <p className="text-sm text-slate-600">{book.author}</p>
                           <div className="flex items-center gap-0.5">
@@ -676,9 +694,9 @@ export function CatalogPage() {
                             <span className="ml-0.5 text-xs text-slate-500">({book.rating})</span>
                           </div>
                           <div className="flex flex-col gap-1.5 text-sm text-slate-500 pt-1">
-                            <span>{book.pages} pages</span>
-                            <span>{book.price} Kč</span>
-                            <span>Age {book.age}+</span>
+                            <span>{book.pages} {t.catalogPage.bookCard.pages}</span>
+                            <span>{formatCurrency(book.price, t)}</span>
+                            <span>{t.catalogPage.bookCard.age} {book.age}+</span>
                           </div>
                         </div>
                       </Link>
@@ -689,11 +707,11 @@ export function CatalogPage() {
                             onClick={() => handleAddToCart(book)}
                             className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                           >
-                            Add to cart
+                            {t.common.addToCart}
                           </button>
                         ) : (
                           <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
-                            Not available
+                            {t.common.notAvailable}
                           </span>
                         )}
                       </div>
@@ -702,13 +720,18 @@ export function CatalogPage() {
                 </div>
               ) : (
                 <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600">
-                  <p className="text-base font-medium">No books found for "{searchQuery}".</p>
-                  <p className="mt-3 text-sm">Try a different search term.</p>
+                  <p className="text-base font-medium">
+                    {t.catalogPage.search.noBooksFound} "{searchQuery}".
+                  </p>
+                  <p className="mt-3 text-sm">{t.catalogPage.search.differentSearchTerm}</p>
                 </div>
               )}
             </SectionCard>
           ) : isFiltersActive ? (
-            <SectionCard eyebrow="Books" title="Filtered results">
+            <SectionCard
+              eyebrow={t.catalogPage.filteredResults.eyebrow}
+              title={t.catalogPage.filteredResults.title}
+            >
               {filteredBooks.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {filteredBooks.map((book) => (
@@ -716,11 +739,13 @@ export function CatalogPage() {
                       <Link to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
                         <img
                           src={book.coverUrl}
-                          alt={`${book.title} cover`}
+                          alt={`${book.title} ${t.catalogPage.bookCard.coverSuffix}`}
                           className="h-32 w-24 rounded-lg object-cover shadow-sm"
                         />
                         <div className="flex-1 flex flex-col gap-1.5">
-                          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">{book.category}</p>
+                          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">
+                            {getLocalizedCategory(book.category, t)}
+                          </p>
                           <h2 className="text-lg font-semibold text-slate-950">{book.title}</h2>
                           <p className="text-sm text-slate-600">{book.author}</p>
                           <div className="flex items-center gap-0.5">
@@ -732,9 +757,9 @@ export function CatalogPage() {
                             <span className="ml-0.5 text-xs text-slate-500">({book.rating})</span>
                           </div>
                           <div className="flex flex-col gap-1.5 text-sm text-slate-500 pt-1">
-                            <span>{book.pages} pages</span>
-                            <span>{book.price} Kč</span>
-                            <span>Age {book.age}+</span>
+                            <span>{book.pages} {t.catalogPage.bookCard.pages}</span>
+                            <span>{formatCurrency(book.price, t)}</span>
+                            <span>{t.catalogPage.bookCard.age} {book.age}+</span>
                           </div>
                         </div>
                       </Link>
@@ -745,11 +770,11 @@ export function CatalogPage() {
                             onClick={() => handleAddToCart(book)}
                             className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                           >
-                            Add to cart
+                            {t.common.addToCart}
                           </button>
                         ) : (
                           <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
-                            Not available
+                            {t.common.notAvailable}
                           </span>
                         )}
                       </div>
@@ -758,18 +783,21 @@ export function CatalogPage() {
                 </div>
               ) : (
                 <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600">
-                  <p className="text-base font-medium">No books match your filters.</p>
-                  <p className="mt-3 text-sm">Try adjusting your filter settings.</p>
+                  <p className="text-base font-medium">{t.catalogPage.filteredResults.noBooksMatch}</p>
+                  <p className="mt-3 text-sm">{t.catalogPage.filteredResults.adjustFilters}</p>
                 </div>
               )}
             </SectionCard>
           ) : (
-            <SectionCard eyebrow="Category" title="Choose your adventure">
+            <SectionCard
+              eyebrow={t.catalogPage.categoriesSection.eyebrow}
+              title={t.catalogPage.categoriesSection.title}
+            >
               <p className="text-sm leading-6 text-slate-600">
-                Browse our collection of books organized into categories. Whether you love thrilling adventures, timeless classics, or thought-provoking mysteries, we have something for every reader. Click on a category to explore the books that await you.
+                {t.catalogPage.categoriesSection.description}
               </p>
               <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {categories.map((category) => (
+                {localizedCategories.map((category) => (
                   <Link
                     key={category.slug}
                     to={toLocalePath(`/catalog/${category.slug}`)}
@@ -785,7 +813,7 @@ export function CatalogPage() {
 
         </div>
 
-        <SectionCard eyebrow="Discounts" title="Great deals">
+        <SectionCard eyebrow={t.catalogPage.discounts.eyebrow} title={t.catalogPage.discounts.title}>
           <div className="space-y-4">
             {books.filter((book) => book.discountPercent > 0).slice(0, 5).map((book) => (
               <div key={book.title} className="flex flex-col">
@@ -796,15 +824,21 @@ export function CatalogPage() {
                   <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
                   <img
                     src={book.coverUrl}
-                    alt={`${book.title} cover`}
+                    alt={`${book.title} ${t.catalogPage.bookCard.coverSuffix}`}
                     className="h-16 w-12 rounded object-cover shadow-sm"
                   />
                   <div className="flex-1">
                     <h3 className="text-sm font-semibold text-slate-950">{book.title}</h3>
                     <p className="text-xs text-slate-600">{book.author}</p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="text-sm font-medium text-slate-900">{book.price} Kč</span>
-                      <span className="text-xs text-slate-500 line-through">{book.originalPrice} Kč</span>
+                    <div className="mt-2 flex items-start gap-2">
+                      <div className="flex flex-col">
+                      <span className="text-xs text-slate-500 line-through">
+                        {formatCurrency(book.originalPrice, t)}
+                      </span>
+                        <span className="text-sm font-medium text-slate-900">
+                          {formatCurrency(book.price, t)}
+                        </span>
+                      </div>
                       <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
                         -{book.discountPercent}%
                       </span>
@@ -817,11 +851,11 @@ export function CatalogPage() {
                       onClick={() => handleAddToCart(book)}
                       className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                     >
-                      Add to cart
+                      {t.common.addToCart}
                     </button>
                   ) : (
                     <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
-                      Not available
+                      {t.common.notAvailable}
                     </span>
                   )}
                 </div>
@@ -831,7 +865,7 @@ export function CatalogPage() {
               to={toLocalePath('/discounts')}
               className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              Show more
+              {t.catalogPage.discounts.showMore}
             </Link>
           </div>
         </SectionCard>
