@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom'
+import { getRemainingDeliveryDays, isOrderDelivered, type OrderRecord } from '../data/orders'
 import { translations, type Language, type Translation } from '../i18n/translation'
 
 const CZK_PER_EUR = 25
@@ -47,9 +48,17 @@ export function getLocalizedOrderStatus(status: string, t: Translation) {
     translations.en.checkoutPage.order.preparing,
     translations.cz.checkoutPage.order.preparing,
   ]
+  const deliveredStatuses = [
+    translations.en.checkoutPage.order.delivered,
+    translations.cz.checkoutPage.order.delivered,
+  ]
 
   if (preparingStatuses.includes(status)) {
     return t.checkoutPage.order.preparing
+  }
+
+  if (deliveredStatuses.includes(status)) {
+    return t.checkoutPage.order.delivered
   }
 
   return status
@@ -121,6 +130,24 @@ export function getLocalizedTimelineNote(note: string, t: Translation) {
     .replace('{dayWord}', dayWord)
     .replace('{dnů}', String(days))
     .replace('{denníSlovo}', dayWord)
+}
+
+export function getOrderTimelineNote(order: OrderRecord, t: Translation) {
+  if (isOrderDelivered(order)) {
+    return t.checkoutPage.order.deliveredTimeline
+  }
+
+  const remainingDays = getRemainingDeliveryDays(order)
+
+  if (remainingDays === null) {
+    return getLocalizedTimelineNote(order.timelineNote, t)
+  }
+
+  const dayWord = remainingDays === 1 ? t.checkoutPage.order.day : t.checkoutPage.order.days
+
+  return t.checkoutPage.order.thanksTimeline
+    .replace('{days}', String(remainingDays))
+    .replace('{dayWord}', dayWord)
 }
 
 export function formatCurrency(amountCzk: number, t: Translation) {

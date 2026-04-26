@@ -47,7 +47,7 @@ const en = {
   },
   appShell: {
     brandLabel: 'Find your book',
-    openingHours: 'Open 10:00-22:00',
+    openingHours: 'Open: 10:00-22:00',
     searchPlaceholder: 'Search books, authors or genres',
     englishVersion: 'English version',
     czechVersion: 'Czech version',
@@ -65,7 +65,7 @@ const en = {
     eyebrow: 'Home',
     title: 'Find your next great read.',
     description:
-      'Browse curated books across fiction, fantasy, business, self-development, and more. Simple recommendations, clear genres, and books worth your time.',
+      'Browse curated books across fiction, fantasy, mystery and more. Simple recommendations, clear genres, and books worth your time.',
     browseCatalog: 'Browse catalog',
     cards: {
       catalog: {
@@ -97,7 +97,7 @@ const en = {
       eyebrow: 'About Us',
       title: 'A bookstore built for discovery',
       description:
-        "We believe discovering your next favorite book should feel effortless and exciting. Our bookstore is built for curious readers who love exploring new stories, ideas, and perspectives. Whether you're into fiction, business, design, or hidden gems, we make it easy to find books that truly resonate with you.",
+        "We believe discovering your next favorite book should feel effortless and exciting. Our bookstore is built for curious readers who love exploring new stories, ideas, and perspectives. Whether you're into fiction, drama, fantasy or any hidden gems, we make it easy to find books that truly resonate with you.",
     },
     story: {
       eyebrow: 'Brand Story',
@@ -112,7 +112,7 @@ const en = {
       eyebrow: 'Contact Us',
       title: 'Where can you find us?',
       addressLabel: 'Address:',
-      address: 'Hlavni 128, 110 00 Prague, Czech Republic',
+      address: 'Hlavní 128, 110 00 Prague, Czech Republic',
       openingTimes: 'Opening times:',
       days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
       supportLabel: 'Contact our support:',
@@ -250,12 +250,14 @@ const en = {
     },
     order: {
       preparing: 'Preparing',
+      delivered: 'Delivered',
       book: 'book',
       books: 'books',
       thanksTimeline:
         'Thanks for your purchase. Your order should be delivered in {days} {dayWord}.',
       thankYouPurchase:
         'Thank you for your purchase and we are happy you chose us. Your order will be delivered in {days} {dayWord}.',
+      deliveredTimeline: 'Your order has already been delivered.',
       day: 'day',
       days: 'days',
     },
@@ -663,98 +665,7 @@ const en = {
     ebook: 'E-book',
     audiobook: 'Audiobook',
   },
-  books: [
-    {
-      title: 'The Lost Expedition',
-      description:
-        'Join Erik Hansen on an unforgettable journey through uncharted territories filled with danger, discovery, and wonder. A thrilling adventure that captures the spirit of exploration.',
-    },
-    {
-      title: 'Moonlit Manor',
-      description:
-        'A gripping mystery set in an ancient manor where secrets hide behind every door. Sara Doyle weaves an intricate plot of suspense and surprising revelations.',
-    },
-    {
-      title: 'Castle of Stars',
-      description:
-        'Explore a magical realm where a castle floats among the stars. An epic fantasy adventure filled with enchantment, heroism, and timeless magic that will captivate readers.',
-    },
-    {
-      title: 'Garden of Thorns',
-      description:
-        'A cursed royal garden hides ancient magic, dangerous bargains, and a secret that could save an entire kingdom.',
-    },
-    {
-      title: 'The Ember Crown',
-      description:
-        'A runaway heir must claim a burning crown before rival kingdoms awaken the fire beneath the mountains.',
-    },
-    {
-      title: 'Winds of Aralon',
-      description:
-        'Sky sailors, storm spirits, and a young mapmaker collide in a floating world ruled by magical winds.',
-    },
-    {
-      title: 'Dragonfall Night',
-      description:
-        'When dragons fall from the stars, a village hunter discovers the night sky has been hiding an old war.',
-    },
-    {
-      title: 'The Silver Oracle',
-      description:
-        'A reluctant seer follows silver visions through a city of mirrors where every prophecy has a price.',
-    },
-    {
-      title: 'Forest of the Hollow King',
-      description:
-        'Deep in an enchanted forest, a forgotten king waits for someone brave enough to break his hollow crown.',
-    },
-    {
-      title: 'Spellbound Harbor',
-      description:
-        'A seaside town of enchanted ships and talking lanterns becomes the key to rescuing a lost moon.',
-    },
-    {
-      title: 'Ashes of the Moon Gate',
-      description:
-        'After a lunar portal shatters, rival mages race through its ashes to stop an empire from returning.',
-    },
-    {
-      title: 'The Crystal Familiar',
-      description:
-        'A student mage bonds with a crystal creature that remembers spells no one else can read.',
-    },
-    {
-      title: 'The War Dispatch',
-      description:
-        'A powerful narrative of courage and sacrifice during wartime. Jakub Martinek chronicles the extraordinary stories of soldiers facing impossible odds and finding hope in darkness.',
-    },
-    {
-      title: 'Voices of Autumn',
-      description:
-        "A collection of beautiful and haunting verses that capture the essence of autumn. Lena Novak's poetry explores themes of change, reflection, and natural beauty.",
-    },
-    {
-      title: 'A Room for Two',
-      description:
-        'A tender romance about two souls discovering love in unexpected circumstances. Olivia Svobodova crafts an emotional journey about connection, vulnerability, and lasting devotion.',
-    },
-    {
-      title: 'Beyond the Fog',
-      description:
-        'A chilling tale of terror that unfolds in the depths of an impenetrable fog. Ondrej Cech creates an atmosphere of dread where danger lurks at every turn.',
-    },
-    {
-      title: 'Czech Heroes',
-      description:
-        'An inspiring chronicle of Czech heroes who shaped history through courage and conviction. Martina Pavlikova brings historical figures to life with vivid storytelling.',
-    },
-    {
-      title: 'The Memoir of Anna',
-      description:
-        "A poignant personal account of Anna's life journey, filled with triumphs and challenges. This memoir offers intimate insights into personal growth, resilience, and self-discovery.",
-    },
-  ],
+  books: [],
 }
 
 const cz = {
@@ -785,7 +696,7 @@ const cz = {
     discounts: 'slevy',
     email: 'e-mail',
     format: 'formát',
-    home: 'domov',
+    home: 'Domov',
     inStock: 'na skladě',
     items: 'položky',
     method: 'metoda',
@@ -796,7 +707,7 @@ const cz = {
     password: 'Heslo',
     payment: 'platba',
     price: 'cena',
-    profile: 'profil',
+    profile: 'Profil',
     remove: 'odstranit',
     searchBooks: 'hledat knihy',
     signIn: 'přihlášení',
@@ -824,7 +735,7 @@ const cz = {
     eyebrow: 'Domov',
     title: 'Najdi si nové dobré počtení.',
     description:
-      'Procházej knihy od fikce, fantasii, přes seberozvoj a dál. Jednoduché doporučení, jasné kategorie, a knihy které stojí za váš čas.',
+      'Procházej knihy od fikce, fantasii, přes detektivky a ještě více. Jednoduché doporučení, jasné kategorie, a knihy které stojí za váš čas.',
     browseCatalog: 'Procházet katalog',
     cards: {
       catalog: {
@@ -836,7 +747,7 @@ const cz = {
         searchPlaceholder: 'Hledej knihy, autory či žánry',
       },
       account: {
-        eyebrow: 'Account',
+        eyebrow: 'Účet',
         title: 'Přihlas se nebo se zaregistruj.',
         description:
           'Ulož si svoje informace pro rychlý přístup, sleduj objednávky a dostaň personalizované výběry knih.',
@@ -856,7 +767,7 @@ const cz = {
       eyebrow: 'O nás',
       title: 'Knihkupectví postavené pro objevování.',
       description:
-        "Věříme že objevování nové oblíbené knihy by mělo být jednoduché a vzrušující. Naše knihkupectví je postaveno pro zvídavé čtenáře, kteří milují objevování nových příběhů, nápadů a perspektiv. Ať tě zajímá fikce, business, design nebo skrytý klenot, chceme aby bylo jednoduché najít knihy které v tobě zanechají dobrý pocit.",
+        "Věříme že objevování nové oblíbené knihy by mělo být jednoduché a vzrušující. Naše knihkupectví je postaveno pro zvídavé čtenáře, kteří milují objevování nových příběhů, nápadů a perspektiv. Ať tě zajímá fikce, drama, fantasy nebo nějaký skrytý klenot, chceme aby bylo jednoduché najít knihy které v tobě zanechají dobrý pocit.",
     },
     story: {
       eyebrow: 'Příběh naší značky',
@@ -931,7 +842,7 @@ const cz = {
     documentTitleFallback: 'Žánr | SWI Frontend',
     heroEyebrow: 'Žánr',
     unknownCategory: 'Neznámý žánr',
-    categoryDescriptionPrefix: 'Projdi si knihy, které jsou označené pod',
+    categoryDescriptionPrefix: 'Projdi si knihy, které jsou označené pod žánrem',
     categoryNotFound: 'Žádaný žánr nebyl nalezen.',
     sectionEyebrow: 'Knihy',
     noCategorySelected: 'Žádný žánr vybrán.',
@@ -939,7 +850,7 @@ const cz = {
     chooseAnotherType: 'Zkus se vrátit do katalogu aby sis vybral jiný žánr.',
   },
   discountsPage: {
-    documentTitle: 'Slevy | Find my book',
+    documentTitle: 'Slevy | Najdi svoji knihu',
     hero: {
       eyebrow: 'Slevy',
       title: 'Speciální nabídka pro tyto knihy',
@@ -1009,12 +920,14 @@ const cz = {
     },
     order: {
       preparing: 'Připravování',
+      delivered: 'Dovezeno',
       book: 'kniha',
       books: 'knihy',
       thanksTimeline:
-        'Děkujeme za váš nákup. Vaše objednávka by měla být dovezena do {dnů} {denníSlovo}.',
+        'Děkujeme za váš nákup. Vaše objednávka by měla být dovezena do {days} {dayWord}.',
       thankYouPurchase:
-        'Děkujeme za váš nákup a jsme rádi že jste si vybrali nás. Vaše objednávka by měla být dovezena do {dnů} {denníSlovo}.',
+        'Děkujeme za váš nákup a jsme rádi že jste si vybrali nás. Vaše objednávka by měla být dovezena do {days} {dayWord}.',
+      deliveredTimeline: 'Vaše objednávka už byla doručena.',
       day: 'den',
       days: 'dnů',
     },
@@ -1055,7 +968,7 @@ const cz = {
       continueToBilling: 'Pokračuj na fakturaci',
       continueToOverview: 'Pokračuj na přehled',
       cardNumber: 'Číslo karty',
-      dayOfValidity: 'Den pllatnosti',
+      dayOfValidity: 'Den platnosti',
       customer: 'Zákazník',
       delivery: 'Dovoz',
       billing: 'Fakturace',
@@ -1260,7 +1173,7 @@ const cz = {
     summary: {
       eyebrow: 'Shrnutí',
       title: 'Detaily objednávky',
-      status: 'Status',
+      status: 'Stav',
       placedOn: 'Objednáno dne',
       items: 'Položky',
       deliveryCost: 'Cena za dovoz',
@@ -1398,8 +1311,8 @@ const cz = {
         "Příběhy zdůrazňující zkušenosti, vztahy a cesty žen z ženské perspektivy.",
     },
     {
-      slug: 'Young-adult',
-      title: 'Young-adult',
+      slug: 'Pro mladé dospělé',
+      title: 'Pro mladé dospělé',
       description:
         'Příběhy o dospívání pro teenagery, kteří se zabývají identitou, láskou a sebepoznáním.',
     },
@@ -1422,98 +1335,7 @@ const cz = {
     ebook: 'E-kniha',
     audiobook: 'Audiokniha',
   },
-  books: [
-    {
-      title: 'The Lost Expedition',
-      description:
-        'Join Erik Hansen on an unforgettable journey through uncharted territories filled with danger, discovery, and wonder. A thrilling adventure that captures the spirit of exploration.',
-    },
-    {
-      title: 'Moonlit Manor',
-      description:
-        'A gripping mystery set in an ancient manor where secrets hide behind every door. Sara Doyle weaves an intricate plot of suspense and surprising revelations.',
-    },
-    {
-      title: 'Castle of Stars',
-      description:
-        'Explore a magical realm where a castle floats among the stars. An epic fantasy adventure filled with enchantment, heroism, and timeless magic that will captivate readers.',
-    },
-    {
-      title: 'Garden of Thorns',
-      description:
-        'A cursed royal garden hides ancient magic, dangerous bargains, and a secret that could save an entire kingdom.',
-    },
-    {
-      title: 'The Ember Crown',
-      description:
-        'A runaway heir must claim a burning crown before rival kingdoms awaken the fire beneath the mountains.',
-    },
-    {
-      title: 'Winds of Aralon',
-      description:
-        'Sky sailors, storm spirits, and a young mapmaker collide in a floating world ruled by magical winds.',
-    },
-    {
-      title: 'Dragonfall Night',
-      description:
-        'When dragons fall from the stars, a village hunter discovers the night sky has been hiding an old war.',
-    },
-    {
-      title: 'The Silver Oracle',
-      description:
-        'A reluctant seer follows silver visions through a city of mirrors where every prophecy has a price.',
-    },
-    {
-      title: 'Forest of the Hollow King',
-      description:
-        'Deep in an enchanted forest, a forgotten king waits for someone brave enough to break his hollow crown.',
-    },
-    {
-      title: 'Spellbound Harbor',
-      description:
-        'A seaside town of enchanted ships and talking lanterns becomes the key to rescuing a lost moon.',
-    },
-    {
-      title: 'Ashes of the Moon Gate',
-      description:
-        'After a lunar portal shatters, rival mages race through its ashes to stop an empire from returning.',
-    },
-    {
-      title: 'The Crystal Familiar',
-      description:
-        'A student mage bonds with a crystal creature that remembers spells no one else can read.',
-    },
-    {
-      title: 'The War Dispatch',
-      description:
-        'A powerful narrative of courage and sacrifice during wartime. Jakub Martinek chronicles the extraordinary stories of soldiers facing impossible odds and finding hope in darkness.',
-    },
-    {
-      title: 'Voices of Autumn',
-      description:
-        "A collection of beautiful and haunting verses that capture the essence of autumn. Lena Novak's poetry explores themes of change, reflection, and natural beauty.",
-    },
-    {
-      title: 'A Room for Two',
-      description:
-        'A tender romance about two souls discovering love in unexpected circumstances. Olivia Svobodova crafts an emotional journey about connection, vulnerability, and lasting devotion.',
-    },
-    {
-      title: 'Beyond the Fog',
-      description:
-        'A chilling tale of terror that unfolds in the depths of an impenetrable fog. Ondrej Cech creates an atmosphere of dread where danger lurks at every turn.',
-    },
-    {
-      title: 'Czech Heroes',
-      description:
-        'An inspiring chronicle of Czech heroes who shaped history through courage and conviction. Martina Pavlikova brings historical figures to life with vivid storytelling.',
-    },
-    {
-      title: 'The Memoir of Anna',
-      description:
-        "A poignant personal account of Anna's life journey, filled with triumphs and challenges. This memoir offers intimate insights into personal growth, resilience, and self-discovery.",
-    },
-  ],
+  books: [],
 }
 
 export const translations = {

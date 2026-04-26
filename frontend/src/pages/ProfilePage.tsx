@@ -16,6 +16,7 @@ import {
   getLocalizedCountry,
   getLocalizedDeliveryMethod,
   getLocalizedOrderStatus,
+  getOrderTimelineNote,
   formatCurrencyText,
   useLocalePath,
   useTranslation,
@@ -497,6 +498,7 @@ function OrderCard({
         <span>
           {t.profilePage.orders.totalPrice} {formatCurrencyText(order.total, t)}
         </span>
+        <span>{getOrderTimelineNote(order, t)}</span>
         <span className="font-medium text-cyan-700">{t.profilePage.orders.openDetails}</span>
       </div>
     </Link>

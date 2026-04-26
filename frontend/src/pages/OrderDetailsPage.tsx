@@ -7,7 +7,7 @@ import {
   getLocalizedDeliveryMethod,
   getLocalizedOrderStatus,
   getLocalizedPaymentMethod,
-  getLocalizedTimelineNote,
+  getOrderTimelineNote,
   formatCurrencyText,
   useLocalePath,
   useTranslation,
@@ -139,7 +139,7 @@ export function OrderDetailsPage() {
         title={t.orderDetailsPage.timeline.title}
       >
         <p className="text-sm leading-7 text-slate-700">
-          {getLocalizedTimelineNote(order.timelineNote, t)}
+          {getOrderTimelineNote(order, t)}
         </p>
       </SectionCard>
     </div>

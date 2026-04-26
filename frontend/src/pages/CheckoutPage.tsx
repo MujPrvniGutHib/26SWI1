@@ -4,7 +4,7 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
-import { saveStoredOrder } from '../data/orders'
+import { addDays, getIsoDate, saveStoredOrder } from '../data/orders'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { getStoredProfileDetails } from '../utils/authStorage'
 import { formatCurrency, getLocalizedCategory, useLocalePath, useTranslation } from '../utils/locale'
@@ -103,10 +103,12 @@ export function CheckoutPage() {
     }
 
     const deliveryDays = Math.floor(Math.random() * 7) + 1
+    const placedOnDate = new Date()
+    const deliveryDueDate = addDays(placedOnDate, deliveryDays)
     setIsPurchaseSubmitted(true)
 
     if (isSignedIn) {
-      const placedOn = new Date().toLocaleDateString('en-US', {
+      const placedOn = placedOnDate.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -117,6 +119,8 @@ export function CheckoutPage() {
         id: `ORD-${Date.now()}`,
         status: t.checkoutPage.order.preparing,
         placedOn,
+        placedOnDate: getIsoDate(placedOnDate),
+        deliveryDueDate: getIsoDate(deliveryDueDate),
         total: `${orderTotal} Kč`,
         itemsLabel: `${itemCount} ${
           itemCount === 1 ? t.checkoutPage.order.book : t.checkoutPage.order.books
