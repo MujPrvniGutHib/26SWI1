@@ -12,7 +12,16 @@ export type ApiBook = {
   title: string;
   author: string;
   price: number;
-  // We will map missing fields from backend to default values in frontend for now
+  category: string;
+  age: number;
+  pages: number;
+  format: string;
+  originalPrice: number;
+  discountPercent: number;
+  rating: number;
+  coverUrl: string;
+  description: string;
+  stock: number;
 };
 
 export const fetchBooks = async (): Promise<ApiBook[]> => {
