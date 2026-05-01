@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
@@ -10,42 +11,56 @@ import {
   useLocalePath,
   useTranslation,
 } from '../utils/locale'
-
-type Book = {
-  title: string
-  author: string
-  category: string
-  age: number
-  price: number
-  pages: number
-  format: string
-  originalPrice: number
-  discountPercent: number
-  rating: number
-  coverUrl: string
-  description: string
-  stock: number
-}
-
-const books: Book[] = []
+import { api } from '../utils/api'
+import type { ApiBook } from '../utils/api'
 
 export function BookDetailsPage() {
   const t = useTranslation()
   const { bookId } = useParams()
   const { addToCart } = useCart()
   const toLocalePath = useLocalePath()
-  const decodedTitle = bookId ? decodeURIComponent(bookId) : ''
-  const book = books.find((b) => b.title === decodedTitle)
+  const [book, setBook] = useState<ApiBook | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchBook = async () => {
+      if (!bookId) return
+      setIsLoading(true)
+      try {
+        const response = await api.get<ApiBook>(`/books/${bookId}`)
+        setBook(response.data)
+      } catch (err) {
+        setError('Failed to fetch book details.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchBook()
+  }, [bookId])
+
   const localizedCategory = book ? getLocalizedCategory(book.category, t) : ''
   useDocumentTitle(`${book?.title || t.bookDetailsPage.documentTitleFallback} | SWI Frontend`)
 
-  if (!book) {
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHero
+          eyebrow={t.bookDetailsPage.hero.eyebrow}
+          title="Loading..."
+          description="Please wait while we fetch the book details."
+        />
+      </div>
+    )
+  }
+
+  if (error || !book) {
     return (
       <div className="space-y-6">
         <PageHero
           eyebrow={t.bookDetailsPage.notFound.eyebrow}
           title={t.bookDetailsPage.notFound.title}
-          description={t.bookDetailsPage.notFound.description}
+          description={error || t.bookDetailsPage.notFound.description}
         />
       </div>
     )

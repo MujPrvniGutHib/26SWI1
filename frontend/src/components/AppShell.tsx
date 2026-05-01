@@ -8,7 +8,6 @@ import { getLocalePrefix, useLanguageLinks, useLocalePath, useTranslation } from
 const navigation = [
   { to: '/', labelKey: 'home' },
   { to: '/catalog', labelKey: 'catalog' },
-  { to: '/table', labelKey: 'table' },
   { to: '/cart', labelKey: 'cart' },
   { to: '/about', labelKey: 'aboutUs' },
 ] as const

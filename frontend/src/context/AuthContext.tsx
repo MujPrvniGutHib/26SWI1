@@ -3,32 +3,35 @@ import { createContext, useContext, useMemo, useState, type PropsWithChildren } 
 
 type AuthContextValue = {
   isSignedIn: boolean
-  signIn: () => void
+  signIn: (user: any) => void
   signOut: () => void
+  getUser: () => any
 }
 
-const AUTH_STORAGE_KEY = 'swi-auth-signed-in'
+const AUTH_STORAGE_KEY = 'swi-auth-user'
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [isSignedIn, setIsSignedIn] = useState(
-    () => window.localStorage.getItem(AUTH_STORAGE_KEY) === 'true',
-  )
+  const [user, setUser] = useState(() => {
+    const storedUser = window.localStorage.getItem(AUTH_STORAGE_KEY)
+    return storedUser ? JSON.parse(storedUser) : null
+  })
 
   const value = useMemo(
     () => ({
-      isSignedIn,
-      signIn: () => {
-        window.localStorage.setItem(AUTH_STORAGE_KEY, 'true')
-        setIsSignedIn(true)
+      isSignedIn: !!user,
+      signIn: (newUser: any) => {
+        window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser))
+        setUser(newUser)
       },
       signOut: () => {
-        window.localStorage.setItem(AUTH_STORAGE_KEY, 'false')
-        setIsSignedIn(false)
+        window.localStorage.removeItem(AUTH_STORAGE_KEY)
+        setUser(null)
       },
+      getUser: () => user,
     }),
-    [isSignedIn],
+    [user],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

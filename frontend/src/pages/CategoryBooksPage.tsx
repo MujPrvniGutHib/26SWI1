@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { formatCurrency, getLocalizedCategory, useLocalePath, useTranslation } from '../utils/locale'
+import { api } from '../utils/api'
+import type { ApiBook } from '../utils/api'
 
 const categoryMap: Record<string, string> = {
   'adventure-stories': 'Adventure stories',
@@ -30,24 +32,6 @@ const categoryMap: Record<string, string> = {
   biography: 'Biography',
 }
 
-type Book = {
-  title: string
-  author: string
-  category: string
-  age: number
-  price: number
-  pages: number
-  format: string
-  originalPrice: number
-  discountPercent: number
-  rating: number
-  coverUrl: string
-  description: string
-  stock: number
-}
-
-const books: Book[] = []
-
 const BOOKS_PER_PAGE = 9
 
 export function CategoryBooksPage() {
@@ -64,6 +48,24 @@ export function CategoryBooksPage() {
   const currentPage =
     pagination.categoryTitle === categoryTitle ? pagination.page : 1
 
+  const [books, setBooks] = useState<ApiBook[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setIsLoading(true)
+      try {
+        const response = await api.get<ApiBook[]>('/books')
+        setBooks(response.data)
+      } catch (error) {
+        console.error('Failed to fetch books', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchBooks()
+  }, [])
+
   useDocumentTitle(
     localizedCategoryTitle
       ? `${localizedCategoryTitle} | SWI Frontend`
@@ -79,7 +81,7 @@ export function CategoryBooksPage() {
     currentPage * BOOKS_PER_PAGE,
   )
 
-  const handleAddToCart = (book: (typeof books)[number]) => {
+  const handleAddToCart = (book: ApiBook) => {
     addToCart({
       title: book.title,
       author: book.author,
@@ -113,11 +115,13 @@ export function CategoryBooksPage() {
         eyebrow={t.categoryBooksPage.sectionEyebrow}
         title={localizedCategoryTitle ?? t.categoryBooksPage.noCategorySelected}
       >
-        {filteredBooks.length > 0 ? (
+        {isLoading ? (
+          <div className="text-center text-slate-500">Loading...</div>
+        ) : filteredBooks.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {paginatedBooks.map((book) => (
-              <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
-                <Link to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
+              <div key={book.id} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
+                <Link to={toLocalePath(`/books/${book.id}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
                   <img
                     src={book.coverUrl}
                     alt={`${book.title} ${t.catalogPage.bookCard.coverSuffix}`}

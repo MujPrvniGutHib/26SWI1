@@ -13,16 +13,11 @@ import { OrderDetailsPage } from './pages/OrderDetailsPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { SignInPage } from './pages/SignInPage'
-import { BookTablePage } from './pages/BookTablePage'
 
 const appRoutes = [
   {
     index: true,
     element: <HomePage />,
-  },
-  {
-    path: 'table',
-    element: <BookTablePage />,
   },
   {
     path: 'catalog',

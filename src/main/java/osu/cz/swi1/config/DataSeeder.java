@@ -52,7 +52,7 @@ public class DataSeeder implements CommandLineRunner {
             book1.setOriginalPrice(35.00);
             book1.setDiscountPercent(14);
             book1.setRating(4.9);
-            book1.setCoverUrl("https://images.unsplash.com/photo-1629196914275-c96faeb21192?q=80&w=1287&auto=format&fit=crop");
+            book1.setCoverUrl("https://covers.openlibrary.org/b/isbn/9780618640157-L.jpg");
             book1.setDescription("An epic high-fantasy novel following the quest to destroy the One Ring.");
             book1.setStock(50);
 
@@ -67,7 +67,7 @@ public class DataSeeder implements CommandLineRunner {
             book2.setOriginalPrice(15.99);
             book2.setDiscountPercent(0);
             book2.setRating(4.8);
-            book2.setCoverUrl("https://images.unsplash.com/photo-1629196914275-c96faeb21192?q=80&w=1287&auto=format&fit=crop");
+            book2.setCoverUrl("https://covers.openlibrary.org/b/isbn/9780547928227-L.jpg");
             book2.setDescription("A children's fantasy novel following the quest of home-loving hobbit Bilbo Baggins.");
             book2.setStock(30);
 
@@ -82,7 +82,7 @@ public class DataSeeder implements CommandLineRunner {
             book3.setOriginalPrice(15.00);
             book3.setDiscountPercent(16);
             book3.setRating(4.7);
-            book3.setCoverUrl("https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1287&auto=format&fit=crop");
+            book3.setCoverUrl("https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg");
             book3.setDescription("A dystopian social science fiction novel and cautionary tale.");
             book3.setStock(100);
 
@@ -97,7 +97,7 @@ public class DataSeeder implements CommandLineRunner {
             book4.setOriginalPrice(9.99);
             book4.setDiscountPercent(0);
             book4.setRating(4.6);
-            book4.setCoverUrl("https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1287&auto=format&fit=crop");
+            book4.setCoverUrl("https://covers.openlibrary.org/b/isbn/9780141439518-L.jpg");
             book4.setDescription("A romantic novel of manners following the character development of Elizabeth Bennet.");
             book4.setStock(20);
 
@@ -112,7 +112,7 @@ public class DataSeeder implements CommandLineRunner {
             book5.setOriginalPrice(14.99);
             book5.setDiscountPercent(0);
             book5.setRating(4.8);
-            book5.setCoverUrl("https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1287&auto=format&fit=crop");
+            book5.setCoverUrl("https://covers.openlibrary.org/b/isbn/9780061120084-L.jpg");
             book5.setDescription("A novel about the seriousness of racism and the loss of innocence in the American South.");
             book5.setStock(40);
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
@@ -11,6 +11,12 @@ import {
   useLocalePath,
   useTranslation,
 } from '../utils/locale'
+import { api } from '../utils/api'
+import type { ApiBook } from '../utils/api'
+import { cn } from '../utils/cn'
+
+type ViewMode = 'grid' | 'table'
+type CatalogView = 'genres' | 'all-books'
 
 const categories = [
   {
@@ -141,47 +147,9 @@ const categories = [
   },
 ]
 
-type Book = {
-  title: string
-  author: string
-  category: string
-  age: number
-  price: number
-  pages: number
-  format: string
-  originalPrice: number
-  discountPercent: number
-  rating: number
-  coverUrl: string
-  description: string
-  stock: number
-}
-
-const books: Book[] = []
-
 const authors: string[] = []
 
 const formats = ['Hardcover book', 'E-book', 'Audiobook']
-
-const catalogPriceRange = books.reduce(
-  (range, book) => ({
-    min: Math.min(range.min, book.price),
-    max: Math.max(range.max, book.price),
-  }),
-  { min: books[0]?.price ?? 0, max: books[0]?.price ?? 0 },
-)
-
-const catalogLengthRange = books.reduce(
-  (range, book) => ({
-    min: Math.min(range.min, book.pages),
-    max: Math.max(range.max, book.pages),
-  }),
-  { min: books[0]?.pages ?? 0, max: books[0]?.pages ?? 0 },
-)
-
-const DEFAULT_AGE = 0
-const DEFAULT_PRICE = catalogPriceRange.min
-const DEFAULT_LENGTH = catalogLengthRange.min
 
 function normalizeSearchText(value: string) {
   return value
@@ -195,7 +163,7 @@ export function CatalogPage() {
   useDocumentTitle(t.catalogPage.documentTitle)
 
   const { addToCart } = useCart()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const toLocalePath = useLocalePath()
   const searchQuery = searchParams.get('q') || ''
   const localizedCategories = categories.map((category, index) => ({
@@ -204,14 +172,57 @@ export function CatalogPage() {
     description: t.categories[index]?.description ?? category.description,
   }))
 
-  const [age, setAge] = useState(DEFAULT_AGE)
-  const [price, setPrice] = useState(DEFAULT_PRICE)
-  const [length, setLength] = useState(DEFAULT_LENGTH)
+  const [books, setBooks] = useState<ApiBook[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [catalogView, setCatalogView] = useState<CatalogView>('genres')
+
+  const [age, setAge] = useState(0)
+  const [price, setPrice] = useState(0)
+  const [length, setLength] = useState(0)
   const [isAgeFilterActive, setIsAgeFilterActive] = useState(false)
   const [isPriceFilterActive, setIsPriceFilterActive] = useState(false)
   const [isLengthFilterActive, setIsLengthFilterActive] = useState(false)
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>([])
   const [selectedFormats, setSelectedFormats] = useState<string[]>([])
+
+  const [sortField, setSortField] = useState('id')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+  useEffect(() => {
+    fetchData()
+  }, [searchQuery, sortField, sortOrder])
+
+  const fetchData = async () => {
+    setIsLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (searchQuery) params.append('search', searchQuery)
+      params.append('sort', sortField)
+      params.append('order', sortOrder)
+
+      const response = await api.get<ApiBook[]>(`/books?${params.toString()}`)
+      setBooks(response.data)
+    } catch (error) {
+      console.error("Failed to fetch table data", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortOrder('asc')
+    }
+  }
+
+  const SortIcon = ({ field }: { field: string }) => {
+    if (sortField !== field) return <span className="text-slate-300 ml-1">↕</span>
+    return <span className="text-cyan-600 ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+  }
 
   const toggleFormat = (format: string) => {
     setSelectedFormats((current) =>
@@ -237,7 +248,7 @@ export function CatalogPage() {
 
   const activeFilters = (isAgeFilterActive ? 1 : 0) + (isPriceFilterActive ? 1 : 0) + (isLengthFilterActive ? 1 : 0) + selectedAuthors.length + selectedFormats.length
 
-  const handleAddToCart = (book: (typeof books)[number]) => {
+  const handleAddToCart = (book: ApiBook) => {
     addToCart({
       title: book.title,
       author: book.author,
@@ -264,6 +275,22 @@ export function CatalogPage() {
     )
   })
 
+  const catalogPriceRange = books.reduce(
+    (range, book) => ({
+      min: Math.min(range.min, book.price),
+      max: Math.max(range.max, book.price),
+    }),
+    { min: books[0]?.price ?? 0, max: books[0]?.price ?? 0 },
+  )
+  
+  const catalogLengthRange = books.reduce(
+    (range, book) => ({
+      min: Math.min(range.min, book.pages),
+      max: Math.max(range.max, book.pages),
+    }),
+    { min: books[0]?.pages ?? 0, max: books[0]?.pages ?? 0 },
+  )
+
   return (
     <div className="space-y-8">
       <PageHero
@@ -271,6 +298,59 @@ export function CatalogPage() {
         title={t.catalogPage.hero.title}
         description={t.catalogPage.hero.description}
       />
+
+      <div className="flex justify-between items-center">
+        <div className="inline-flex rounded-full bg-slate-100 p-1">
+          <button
+            onClick={() => setCatalogView('genres')}
+            className={cn(
+              'rounded-full px-5 py-2.5 text-sm font-medium transition',
+              catalogView === 'genres'
+                ? 'bg-slate-950 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-950',
+            )}
+          >
+            Genres
+          </button>
+          <button
+            onClick={() => setCatalogView('all-books')}
+            className={cn(
+              'rounded-full px-5 py-2.5 text-sm font-medium transition',
+              catalogView === 'all-books'
+                ? 'bg-slate-950 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-950',
+            )}
+          >
+            All Books
+          </button>
+        </div>
+        {catalogView === 'all-books' && (
+          <div className="inline-flex rounded-full bg-slate-100 p-1">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={cn(
+                'rounded-full px-5 py-2.5 text-sm font-medium transition',
+                viewMode === 'grid'
+                  ? 'bg-slate-950 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-950',
+              )}
+            >
+              Grid
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={cn(
+                'rounded-full px-5 py-2.5 text-sm font-medium transition',
+                viewMode === 'table'
+                  ? 'bg-slate-950 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-950',
+              )}
+            >
+              Table
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="grid gap-8 items-start xl:grid-cols-[250px_minmax(0,1fr)_280px]">
         <SectionCard
@@ -381,170 +461,170 @@ export function CatalogPage() {
           </div>
         </SectionCard>
 
-        <div className="space-y-6">
-          {searchQuery ? (
-            <SectionCard
-              eyebrow={t.catalogPage.search.eyebrow}
-              title={`${t.catalogPage.search.resultsFor} "${searchQuery}"`}
-              actions={
+        {catalogView === 'genres' ? (
+          <SectionCard
+            eyebrow={t.catalogPage.categoriesSection.eyebrow}
+            title={t.catalogPage.categoriesSection.title}
+          >
+            <p className="text-sm leading-6 text-slate-600">
+              {t.catalogPage.categoriesSection.description}
+            </p>
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {localizedCategories.map((category) => (
                 <Link
-                  to={toLocalePath('/catalog')}
-                  className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                  key={category.slug}
+                  to={toLocalePath(`/catalog/${category.slug}`)}
+                  className="group rounded-3xl border border-slate-200 bg-slate-50 py-6 pl-12 pr-12 text-center shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50"
                 >
-                  {t.catalogPage.search.backToGenres}
+                  <h2 className="mt-4 text-xl font-semibold text-slate-950">{category.title}</h2>
+                  <p className="mt-4 text-sm leading-6 text-slate-600">{category.description}</p>
                 </Link>
-              }
-            >
-              {filteredBooks.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {filteredBooks.map((book) => (
-                    <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
-                      <Link to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
-                        <img
-                          src={book.coverUrl}
-                          alt={`${book.title} ${t.catalogPage.bookCard.coverSuffix}`}
-                          className="h-32 w-24 rounded-lg object-cover shadow-sm"
-                        />
-                        <div className="flex-1 flex flex-col gap-1.5">
-                          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">
-                            {getLocalizedCategory(book.category, t)}
-                          </p>
-                          <h2 className="text-lg font-semibold text-slate-950">{book.title}</h2>
-                          <p className="text-sm text-slate-600">{book.author}</p>
-                          <div className="flex items-center gap-0.5">
-                            {Array.from({ length: 5 }, (_, i) => (
-                              <span key={i} className={i < Math.floor(book.rating) ? 'text-yellow-400' : 'text-gray-300'}>
-                                ★
-                              </span>
-                            ))}
-                            <span className="ml-0.5 text-xs text-slate-500">({book.rating})</span>
-                          </div>
-                          <div className="flex flex-col gap-1.5 text-sm text-slate-500 pt-1">
-                            <span>{book.pages} {t.catalogPage.bookCard.pages}</span>
-                            <span>{formatCurrency(book.price, t)}</span>
-                            <span>{t.catalogPage.bookCard.age} {book.age}+</span>
-                          </div>
+              ))}
+            </div>
+          </SectionCard>
+        ) : viewMode === 'grid' ? (
+          <div className="space-y-6">
+            {filteredBooks.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {filteredBooks.map((book) => (
+                  <div key={book.id} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
+                    <Link to={toLocalePath(`/books/${book.id}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
+                      <img
+                        src={book.coverUrl}
+                        alt={`${book.title} ${t.catalogPage.bookCard.coverSuffix}`}
+                        className="h-32 w-24 rounded-lg object-cover shadow-sm"
+                      />
+                      <div className="flex-1 flex flex-col gap-1.5">
+                        <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">
+                          {getLocalizedCategory(book.category, t)}
+                        </p>
+                        <h2 className="text-lg font-semibold text-slate-950">{book.title}</h2>
+                        <p className="text-sm text-slate-600">{book.author}</p>
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }, (_, i) => (
+                            <span key={i} className={i < Math.floor(book.rating) ? 'text-yellow-400' : 'text-gray-300'}>
+                              ★
+                            </span>
+                          ))}
+                          <span className="ml-0.5 text-xs text-slate-500">({book.rating})</span>
                         </div>
-                      </Link>
-                      <div className="px-6 pb-5">
-                        {book.stock > 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => handleAddToCart(book)}
-                            className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
-                          >
-                            {t.common.addToCart}
-                          </button>
-                        ) : (
-                          <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
-                            {t.common.notAvailable}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600">
-                  <p className="text-base font-medium">
-                    {t.catalogPage.search.noBooksFound} "{searchQuery}".
-                  </p>
-                  <p className="mt-3 text-sm">{t.catalogPage.search.differentSearchTerm}</p>
-                </div>
-              )}
-            </SectionCard>
-          ) : isFiltersActive ? (
-            <SectionCard
-              eyebrow={t.catalogPage.filteredResults.eyebrow}
-              title={t.catalogPage.filteredResults.title}
-            >
-              {filteredBooks.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {filteredBooks.map((book) => (
-                    <div key={book.title} className="flex flex-col rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">
-                      <Link to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)} className="flex flex-1 flex-row-reverse gap-4 items-center pl-14 pr-6 py-5">
-                        <img
-                          src={book.coverUrl}
-                          alt={`${book.title} ${t.catalogPage.bookCard.coverSuffix}`}
-                          className="h-32 w-24 rounded-lg object-cover shadow-sm"
-                        />
-                        <div className="flex-1 flex flex-col gap-1.5">
-                          <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">
-                            {getLocalizedCategory(book.category, t)}
-                          </p>
-                          <h2 className="text-lg font-semibold text-slate-950">{book.title}</h2>
-                          <p className="text-sm text-slate-600">{book.author}</p>
-                          <div className="flex items-center gap-0.5">
-                            {Array.from({ length: 5 }, (_, i) => (
-                              <span key={i} className={i < Math.floor(book.rating) ? 'text-yellow-400' : 'text-gray-300'}>
-                                ★
-                              </span>
-                            ))}
-                            <span className="ml-0.5 text-xs text-slate-500">({book.rating})</span>
-                          </div>
-                          <div className="flex flex-col gap-1.5 text-sm text-slate-500 pt-1">
-                            <span>{book.pages} {t.catalogPage.bookCard.pages}</span>
-                            <span>{formatCurrency(book.price, t)}</span>
-                            <span>{t.catalogPage.bookCard.age} {book.age}+</span>
-                          </div>
+                        <div className="flex flex-col gap-1.5 text-sm text-slate-500 pt-1">
+                          <span>{book.pages} {t.catalogPage.bookCard.pages}</span>
+                          <span>{formatCurrency(book.price, t)}</span>
+                          <span>{t.catalogPage.bookCard.age} {book.age}+</span>
                         </div>
-                      </Link>
-                      <div className="px-6 pb-5">
-                        {book.stock > 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => handleAddToCart(book)}
-                            className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
-                          >
-                            {t.common.addToCart}
-                          </button>
-                        ) : (
-                          <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
-                            {t.common.notAvailable}
-                          </span>
-                        )}
                       </div>
+                    </Link>
+                    <div className="px-6 pb-5">
+                      {book.stock > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => handleAddToCart(book)}
+                          className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                        >
+                          {t.common.addToCart}
+                        </button>
+                      ) : (
+                        <span className="inline-flex w-full items-center justify-center rounded-full bg-slate-300 px-4 py-2 text-sm font-medium text-slate-500 cursor-not-allowed">
+                          {t.common.notAvailable}
+                        </span>
+                      )}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600">
-                  <p className="text-base font-medium">{t.catalogPage.filteredResults.noBooksMatch}</p>
-                  <p className="mt-3 text-sm">{t.catalogPage.filteredResults.adjustFilters}</p>
-                </div>
-              )}
-            </SectionCard>
-          ) : (
-            <SectionCard
-              eyebrow={t.catalogPage.categoriesSection.eyebrow}
-              title={t.catalogPage.categoriesSection.title}
-            >
-              <p className="text-sm leading-6 text-slate-600">
-                {t.catalogPage.categoriesSection.description}
-              </p>
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {localizedCategories.map((category) => (
-                  <Link
-                    key={category.slug}
-                    to={toLocalePath(`/catalog/${category.slug}`)}
-                    className="group rounded-3xl border border-slate-200 bg-slate-50 py-6 pl-12 pr-12 text-center shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50"
-                  >
-                    <h2 className="mt-4 text-xl font-semibold text-slate-950">{category.title}</h2>
-                    <p className="mt-4 text-sm leading-6 text-slate-600">{category.description}</p>
-                  </Link>
+                  </div>
                 ))}
               </div>
-            </SectionCard>
-          )}
-
-        </div>
+            ) : (
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-slate-600">
+                <p className="text-base font-medium">{t.catalogPage.filteredResults.noBooksMatch}</p>
+                <p className="mt-3 text-sm">{t.catalogPage.filteredResults.adjustFilters}</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="min-w-full divide-y divide-slate-200 text-sm">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th
+                    onClick={() => handleSort('id')}
+                    className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
+                  >
+                    {t.tablePage.table.id} <SortIcon field="id" />
+                  </th>
+                  <th
+                    onClick={() => handleSort('title')}
+                    className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
+                  >
+                    {t.tablePage.table.title} <SortIcon field="title" />
+                  </th>
+                  <th
+                    onClick={() => handleSort('author')}
+                    className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
+                  >
+                    {t.tablePage.table.author} <SortIcon field="author" />
+                  </th>
+                  <th
+                    onClick={() => handleSort('category')}
+                    className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
+                  >
+                    {t.tablePage.table.category} <SortIcon field="category" />
+                  </th>
+                  <th
+                    onClick={() => handleSort('pages')}
+                    className="cursor-pointer px-4 py-3 text-right font-semibold text-slate-900 hover:bg-slate-100"
+                  >
+                    {t.tablePage.table.pages} <SortIcon field="pages" />
+                  </th>
+                  <th
+                    onClick={() => handleSort('price')}
+                    className="cursor-pointer px-4 py-3 text-right font-semibold text-slate-900 hover:bg-slate-100"
+                  >
+                    {t.tablePage.table.price} <SortIcon field="price" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 bg-white">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                      Loading...
+                    </td>
+                  </tr>
+                ) : filteredBooks.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                      No books found.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredBooks.map((book) => (
+                    <tr key={book.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3 text-slate-600">{book.id}</td>
+                      <td className="px-4 py-3 font-medium text-cyan-700">
+                          <Link to={toLocalePath(`/books/${book.id}`)} className="hover:underline">
+                              {book.title}
+                          </Link>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600">{book.author}</td>
+                      <td className="px-4 py-3 text-slate-600">{book.category}</td>
+                      <td className="px-4 py-3 text-right text-slate-600">{book.pages}</td>
+                      <td className="px-4 py-3 text-right font-medium text-slate-900">
+                        {formatCurrency(book.price, t)}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <SectionCard eyebrow={t.catalogPage.discounts.eyebrow} title={t.catalogPage.discounts.title}>
           <div className="space-y-4">
             {books.filter((book) => book.discountPercent > 0).slice(0, 5).map((book) => (
-              <div key={book.title} className="flex flex-col">
+              <div key={book.id} className="flex flex-col">
                 <Link
-                  to={toLocalePath(`/books/${encodeURIComponent(book.title)}`)}
+                  to={toLocalePath(`/books/${book.id}`)}
                   className="block"
                 >
                   <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-cyan-300 hover:bg-cyan-50">

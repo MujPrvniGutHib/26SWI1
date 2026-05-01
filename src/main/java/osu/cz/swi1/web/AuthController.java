@@ -74,13 +74,11 @@ public class AuthController {
 
         // Create new user's account
         User user = new User();
-        // Since frontend sends firstName/lastName, we'll combine them for username or use email
-        user.setUsername(signUpRequest.getEmail()); 
+        user.setUsername(signUpRequest.getFirstName() + " " + signUpRequest.getLastName());
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(encoder.encode(signUpRequest.getPassword()));
 
         Set<Role> roles = new HashSet<>();
-        // Assign a default USER role. In a real app, you'd fetch this from DB and ensure it exists.
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseGet(() -> {
                     Role r = new Role();

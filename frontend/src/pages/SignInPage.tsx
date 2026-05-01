@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { SectionCard } from '../components/SectionCard'
 import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { getStoredAccount, saveStoredAccount } from '../utils/authStorage'
+import { api } from '../utils/api'
 import { cn } from '../utils/cn'
 import { useLocalePath, useTranslation } from '../utils/locale'
 
@@ -59,16 +59,16 @@ export function SignInPage() {
 
           {activeTab === 'login' ? (
             <LoginForm
-              onSuccess={() => {
-                signIn()
+              onSuccess={(user) => {
+                signIn(user)
                 setProfileMessage('')
                 navigate(toLocalePath('/profile'))
               }}
             />
           ) : (
             <RegisterForm
-              onSuccess={() => {
-                signIn()
+              onSuccess={(user) => {
+                signIn(user)
                 setProfileMessage('')
                 navigate(toLocalePath('/profile'))
               }}
@@ -135,48 +135,38 @@ export function SignInPage() {
   )
 }
 
-function LoginForm({ onSuccess }: { onSuccess: () => void }) {
+function LoginForm({ onSuccess }: { onSuccess: (user: any) => void }) {
   const t = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const toLocalePath = useLocalePath()
 
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    const normalizedEmail = email.trim().toLowerCase()
+
+    if (!normalizedEmail || !password) {
+      setError(t.signInPage.loginForm.missingCredentials)
+      return
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      setError(t.signInPage.loginForm.invalidEmail)
+      return
+    }
+
+    try {
+      const response = await api.post('/api/auth/signin', { email: normalizedEmail, password })
+      setError('')
+      onSuccess(response.data)
+    } catch (err: any) {
+      setError(err.response?.data?.message || t.signInPage.loginForm.wrongCredentials)
+    }
+  }
+
   return (
-    <form
-      className="mt-8 grid gap-5"
-      onSubmit={(event) => {
-        event.preventDefault()
-        const normalizedEmail = email.trim().toLowerCase()
-        const storedAccount = getStoredAccount()
-
-        if (!normalizedEmail || !password) {
-          setError(t.signInPage.loginForm.missingCredentials)
-          return
-        }
-
-        if (!isValidEmail(normalizedEmail)) {
-          setError(t.signInPage.loginForm.invalidEmail)
-          return
-        }
-
-        if (!storedAccount) {
-          setError(t.signInPage.loginForm.noAccountFound)
-          return
-        }
-
-        if (
-          normalizedEmail !== storedAccount.email.toLowerCase() ||
-          password !== storedAccount.password
-        ) {
-          setError(t.signInPage.loginForm.wrongCredentials)
-          return
-        }
-
-        setError('')
-        onSuccess()
-      }}
-    >
+    <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>
       <label className="grid gap-2">
         <span className="text-sm font-medium text-slate-700">{t.signInPage.loginForm.email}</span>
         <input
@@ -222,7 +212,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   )
 }
 
-function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
+function RegisterForm({ onSuccess }: { onSuccess: (user: any) => void }) {
   const t = useTranslation()
   const [form, setForm] = useState({
     firstName: '',
@@ -234,54 +224,61 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   })
   const [error, setError] = useState('')
 
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    const normalizedEmail = form.email.trim().toLowerCase()
+
+    if (
+      !form.firstName.trim() ||
+      !form.lastName.trim() ||
+      !normalizedEmail ||
+      !form.password ||
+      !form.confirmPassword
+    ) {
+      setError(t.signInPage.registerForm.missingFields)
+      return
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      setError(t.signInPage.registerForm.invalidEmail)
+      return
+    }
+
+    if (form.password.length < 8) {
+      setError(t.signInPage.registerForm.shortPassword)
+      return
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError(t.signInPage.registerForm.passwordMismatch)
+      return
+    }
+
+    if (!form.acceptedTerms) {
+      setError(t.signInPage.registerForm.termsRequired)
+      return
+    }
+
+    try {
+      await api.post('/api/auth/signup', {
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        email: normalizedEmail,
+        password: form.password,
+      })
+      const response = await api.post('/api/auth/signin', {
+        email: normalizedEmail,
+        password: form.password,
+      })
+      setError('')
+      onSuccess(response.data)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'An unexpected error occurred.')
+    }
+  }
+
   return (
-    <form
-      className="mt-8 grid gap-5"
-      onSubmit={(event) => {
-        event.preventDefault()
-        const normalizedEmail = form.email.trim().toLowerCase()
-
-        if (
-          !form.firstName.trim() ||
-          !form.lastName.trim() ||
-          !normalizedEmail ||
-          !form.password ||
-          !form.confirmPassword
-        ) {
-          setError(t.signInPage.registerForm.missingFields)
-          return
-        }
-
-        if (!isValidEmail(normalizedEmail)) {
-          setError(t.signInPage.registerForm.invalidEmail)
-          return
-        }
-
-        if (form.password.length < 8) {
-          setError(t.signInPage.registerForm.shortPassword)
-          return
-        }
-
-        if (form.password !== form.confirmPassword) {
-          setError(t.signInPage.registerForm.passwordMismatch)
-          return
-        }
-
-        if (!form.acceptedTerms) {
-          setError(t.signInPage.registerForm.termsRequired)
-          return
-        }
-
-        saveStoredAccount({
-          firstName: form.firstName.trim(),
-          lastName: form.lastName.trim(),
-          email: normalizedEmail,
-          password: form.password,
-        })
-        setError('')
-        onSuccess()
-      }}
-    >
+    <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2">
           <span className="text-sm font-medium text-slate-700">

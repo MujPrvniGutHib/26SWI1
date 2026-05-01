@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
@@ -6,44 +6,36 @@ import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import { addDays, getIsoDate, saveStoredOrder } from '../data/orders'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { getStoredProfileDetails } from '../utils/authStorage'
 import { formatCurrency, getLocalizedCategory, useLocalePath, useTranslation } from '../utils/locale'
 
 export function CheckoutPage() {
   const t = useTranslation()
   useDocumentTitle(t.checkoutPage.documentTitle)
   const { cartItems, clearCart } = useCart()
-  const { isSignedIn } = useAuth()
+  const { isSignedIn, getUser } = useAuth()
   const toLocalePath = useLocalePath()
   const [checkoutStep, setCheckoutStep] = useState<'details' | 'delivery' | 'billing' | 'overview'>(
     'details',
   )
-  const [checkoutDetails, setCheckoutDetails] = useState(() => {
-    if (!isSignedIn) {
-      return {
-        name: '',
-        email: '',
-        telephone: '',
-        address: '',
-      }
-    }
-
-    const profileDetails = getStoredProfileDetails()
-
-    return {
-      name: profileDetails.fullName,
-      email: profileDetails.email,
-      telephone: profileDetails.telephone,
-      address: [
-        profileDetails.street,
-        profileDetails.city,
-        profileDetails.zipCode,
-        profileDetails.country,
-      ]
-        .filter(Boolean)
-        .join(', '),
-    }
+  const [checkoutDetails, setCheckoutDetails] = useState({
+    name: '',
+    email: '',
+    telephone: '',
+    address: '',
   })
+
+  useEffect(() => {
+    if (isSignedIn) {
+      const user = getUser()
+      setCheckoutDetails({
+        name: user.username,
+        email: user.email,
+        telephone: user.telephone || '',
+        address: user.address || '',
+      })
+    }
+  }, [isSignedIn, getUser])
+
   const [billingOption, setBillingOption] = useState('')
   const [deliveryOption, setDeliveryOption] = useState('')
   const [cardDetails, setCardDetails] = useState({
