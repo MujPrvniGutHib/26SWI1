@@ -58,6 +58,24 @@ const en = {
       aboutUs: 'About us',
       profile: 'Profile',
       signIn: 'Sign In',
+      table: 'Table',
+    },
+  },
+  tablePage: {
+    documentTitle: 'Book Table | SWI Frontend',
+    hero: {
+      eyebrow: 'Book Table',
+      title: 'Sort and Search Books',
+      description: 'A sortable and searchable table of all the books in the store.',
+    },
+    searchPlaceholder: 'Search by title or author',
+    table: {
+      id: 'ID',
+      title: 'Title',
+      author: 'Author',
+      category: 'Category',
+      pages: 'Pages',
+      price: 'Price',
     },
   },
   homePage: {
@@ -728,6 +746,24 @@ const cz = {
       aboutUs: 'O nás',
       profile: 'Profil',
       signIn: 'Přihlášení',
+      table: 'Tabulka',
+    },
+  },
+  tablePage: {
+    documentTitle: 'Tabulka Knih | SWI Frontend',
+    hero: {
+      eyebrow: 'Tabulka Knih',
+      title: 'Řadit a Hledat Knihy',
+      description: 'Řaditelná a prohledávatelná tabulka všech knih v obchodě.',
+    },
+    searchPlaceholder: 'Hledat podle názvu nebo autora',
+    table: {
+      id: 'ID',
+      title: 'Název',
+      author: 'Autor',
+      category: 'Kategorie',
+      pages: 'Stránky',
+      price: 'Cena',
     },
   },
   homePage: {

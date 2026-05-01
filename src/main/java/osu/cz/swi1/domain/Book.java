@@ -25,11 +25,16 @@ public class Book {
     
     // New fields added to match frontend requirements
     private String category;
+    @Column(columnDefinition = "integer default 0")
     private int age;
+    @Column(columnDefinition = "integer default 0")
     private int pages;
     private String format;
+    @Column(columnDefinition = "double precision default 0.0")
     private double originalPrice;
+    @Column(columnDefinition = "integer default 0")
     private int discountPercent;
+    @Column(columnDefinition = "double precision default 0.0")
     private double rating;
     
     @Column(length = 2000)
@@ -38,6 +43,7 @@ public class Book {
     @Column(length = 2000)
     private String description;
     
+    @Column(columnDefinition = "integer default 0")
     private int stock;
 
 }

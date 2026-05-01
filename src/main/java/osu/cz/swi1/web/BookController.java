@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/books")
 @CrossOrigin(origins = "*") // Allows your frontend to communicate with this backend
 public class BookController {
 
