@@ -61,7 +61,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
                 auth.requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/books/**").permitAll() // Open for now, secure later if needed
+                    .requestMatchers("/books/**").permitAll() // Open for now, secure later if needed
                     .anyRequest().authenticated()
             );
 

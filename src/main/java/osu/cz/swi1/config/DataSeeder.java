@@ -39,6 +39,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedBooks() {
+        bookRepository.deleteAll();
         if (bookRepository.count() == 0) {
             Book book1 = new Book();
             book1.setTitle("The Lord of the Rings");
@@ -100,7 +101,22 @@ public class DataSeeder implements CommandLineRunner {
             book4.setDescription("A romantic novel of manners following the character development of Elizabeth Bennet.");
             book4.setStock(20);
 
-            bookRepository.saveAll(Arrays.asList(book1, book2, book3, book4));
+            Book book5 = new Book();
+            book5.setTitle("To Kill a Mockingbird");
+            book5.setAuthor("Harper Lee");
+            book5.setPrice(14.99);
+            book5.setCategory("Classics");
+            book5.setAge(14);
+            book5.setPages(281);
+            book5.setFormat("Paperback");
+            book5.setOriginalPrice(14.99);
+            book5.setDiscountPercent(0);
+            book5.setRating(4.8);
+            book5.setCoverUrl("https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=1287&auto=format&fit=crop");
+            book5.setDescription("A novel about the seriousness of racism and the loss of innocence in the American South.");
+            book5.setStock(40);
+
+            bookRepository.saveAll(Arrays.asList(book1, book2, book3, book4, book5));
             System.out.println("Books seeded.");
         }
     }
