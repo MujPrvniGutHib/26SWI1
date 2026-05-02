@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
@@ -73,6 +73,7 @@ const categories = [
     description:
       'Character-driven stories emphasizing psychological depth and complex themes in stylistic prose.',
   },
+
   {
     title: 'Mystery',
     slug: 'mystery',
@@ -158,6 +159,19 @@ function normalizeSearchText(value: string) {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
+function SortIcon({
+  field,
+  sortField,
+  sortOrder,
+}: {
+  field: string
+  sortField: string
+  sortOrder: 'asc' | 'desc'
+}) {
+  if (sortField !== field) return <span className="text-slate-300 ml-1">↕</span>
+  return <span className="text-cyan-600 ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
+}
+
 export function CatalogPage() {
   const t = useTranslation()
   useDocumentTitle(t.catalogPage.documentTitle)
@@ -166,6 +180,7 @@ export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const toLocalePath = useLocalePath()
   const searchQuery = searchParams.get('q') || ''
+  const catalogView = (searchParams.get('view') as CatalogView) || 'genres'
   const localizedCategories = categories.map((category, index) => ({
     ...category,
     title: t.categories[index]?.title ?? category.title,
@@ -175,7 +190,6 @@ export function CatalogPage() {
   const [books, setBooks] = useState<ApiBook[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
-  const [catalogView, setCatalogView] = useState<CatalogView>('genres')
 
   const [age, setAge] = useState(0)
   const [price, setPrice] = useState(0)
@@ -189,11 +203,7 @@ export function CatalogPage() {
   const [sortField, setSortField] = useState('id')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
-  useEffect(() => {
-    fetchData()
-  }, [searchQuery, sortField, sortOrder])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true)
     try {
       const params = new URLSearchParams()
@@ -208,7 +218,11 @@ export function CatalogPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [searchQuery, sortField, sortOrder])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const handleSort = (field: string) => {
     if (sortField === field) {
@@ -217,11 +231,6 @@ export function CatalogPage() {
       setSortField(field)
       setSortOrder('asc')
     }
-  }
-
-  const SortIcon = ({ field }: { field: string }) => {
-    if (sortField !== field) return <span className="text-slate-300 ml-1">↕</span>
-    return <span className="text-cyan-600 ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
   }
 
   const toggleFormat = (format: string) => {
@@ -243,8 +252,6 @@ export function CatalogPage() {
   const normalizedSearchTokens = normalizeSearchText(searchQuery)
     .split(/\s+/)
     .filter(Boolean)
-
-  const isFiltersActive = searchQuery !== '' || isAgeFilterActive || isPriceFilterActive || isLengthFilterActive || selectedAuthors.length > 0 || selectedFormats.length > 0
 
   const activeFilters = (isAgeFilterActive ? 1 : 0) + (isPriceFilterActive ? 1 : 0) + (isLengthFilterActive ? 1 : 0) + selectedAuthors.length + selectedFormats.length
 
@@ -290,6 +297,10 @@ export function CatalogPage() {
     }),
     { min: books[0]?.pages ?? 0, max: books[0]?.pages ?? 0 },
   )
+
+  const setCatalogView = (view: CatalogView) => {
+    setSearchParams({ view })
+  }
 
   return (
     <div className="space-y-8">
@@ -549,37 +560,37 @@ export function CatalogPage() {
                     onClick={() => handleSort('id')}
                     className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
                   >
-                    {t.tablePage.table.id} <SortIcon field="id" />
+                    {t.tablePage.table.id} <SortIcon field="id" sortField={sortField} sortOrder={sortOrder} />
                   </th>
                   <th
                     onClick={() => handleSort('title')}
                     className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
                   >
-                    {t.tablePage.table.title} <SortIcon field="title" />
+                    {t.tablePage.table.title} <SortIcon field="title" sortField={sortField} sortOrder={sortOrder} />
                   </th>
                   <th
                     onClick={() => handleSort('author')}
                     className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
                   >
-                    {t.tablePage.table.author} <SortIcon field="author" />
+                    {t.tablePage.table.author} <SortIcon field="author" sortField={sortField} sortOrder={sortOrder} />
                   </th>
                   <th
                     onClick={() => handleSort('category')}
                     className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
                   >
-                    {t.tablePage.table.category} <SortIcon field="category" />
+                    {t.tablePage.table.category} <SortIcon field="category" sortField={sortField} sortOrder={sortOrder} />
                   </th>
                   <th
                     onClick={() => handleSort('pages')}
                     className="cursor-pointer px-4 py-3 text-right font-semibold text-slate-900 hover:bg-slate-100"
                   >
-                    {t.tablePage.table.pages} <SortIcon field="pages" />
+                    {t.tablePage.table.pages} <SortIcon field="pages" sortField={sortField} sortOrder={sortOrder} />
                   </th>
                   <th
                     onClick={() => handleSort('price')}
                     className="cursor-pointer px-4 py-3 text-right font-semibold text-slate-900 hover:bg-slate-100"
                   >
-                    {t.tablePage.table.price} <SortIcon field="price" />
+                    {t.tablePage.table.price} <SortIcon field="price" sortField={sortField} sortOrder={sortOrder} />
                   </th>
                 </tr>
               </thead>

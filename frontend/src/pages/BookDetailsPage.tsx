@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
+import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import {
@@ -14,30 +15,64 @@ import {
 import { api } from '../utils/api'
 import type { ApiBook } from '../utils/api'
 
+type Review = {
+  id: number;
+  author: string;
+  comment: string;
+  rating: number;
+}
+
 export function BookDetailsPage() {
   const t = useTranslation()
   const { bookId } = useParams()
   const { addToCart } = useCart()
+  const { isSignedIn, getUser } = useAuth()
   const toLocalePath = useLocalePath()
   const [book, setBook] = useState<ApiBook | null>(null)
+  const [reviews, setReviews] = useState<Review[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [newReview, setNewReview] = useState({ comment: '', rating: 0 })
 
   useEffect(() => {
-    const fetchBook = async () => {
+    const fetchBookAndReviews = async () => {
       if (!bookId) return
       setIsLoading(true)
       try {
-        const response = await api.get<ApiBook>(`/books/${bookId}`)
-        setBook(response.data)
+        const [bookResponse, reviewsResponse] = await Promise.all([
+          api.get<ApiBook>(`/books/${bookId}`),
+          api.get<Review[]>(`/api/reviews?bookId=${bookId}`),
+        ])
+        setBook(bookResponse.data)
+        setReviews(reviewsResponse.data)
       } catch (err) {
         setError('Failed to fetch book details.')
       } finally {
         setIsLoading(false)
       }
     }
-    fetchBook()
+    fetchBookAndReviews()
   }, [bookId])
+
+  const handleReviewSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!book || !isSignedIn) return
+
+    const user = getUser()
+    const review = {
+      ...newReview,
+      author: user.username,
+      book: { id: book.id },
+    }
+
+    try {
+      const response = await api.post<Review>('/api/reviews', review)
+      setReviews([...reviews, response.data])
+      setNewReview({ comment: '', rating: 0 })
+    } catch (err) {
+      console.error('Failed to submit review', err)
+    }
+  }
 
   const localizedCategory = book ? getLocalizedCategory(book.category, t) : ''
   useDocumentTitle(`${book?.title || t.bookDetailsPage.documentTitleFallback} | SWI Frontend`)
@@ -181,6 +216,70 @@ export function BookDetailsPage() {
           </div>
         </SectionCard>
       </div>
+
+      <SectionCard eyebrow="Reviews" title="What our readers are saying">
+        <div className="space-y-4">
+          {reviews.map((review) => (
+            <div key={review.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center gap-2">
+                <p className="font-semibold">{review.author}</p>
+                <div className="flex items-center gap-0.5">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span key={i} className={i < review.rating ? 'text-yellow-400' : 'text-gray-300'}>
+                      ★
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-slate-600">{review.comment}</p>
+            </div>
+          ))}
+        </div>
+
+        {isSignedIn && (
+          <form onSubmit={handleReviewSubmit} className="mt-6 space-y-4">
+            <h3 className="text-lg font-semibold">Write a review</h3>
+            <div>
+              <label htmlFor="rating" className="block text-sm font-medium text-slate-700">
+                Rating
+              </label>
+              <div className="flex gap-1 mt-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setNewReview({ ...newReview, rating: star })}
+                    className={cn(
+                      'text-2xl',
+                      star <= newReview.rating ? 'text-yellow-400' : 'text-gray-300',
+                    )}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label htmlFor="comment" className="block text-sm font-medium text-slate-700">
+                Comment
+              </label>
+              <textarea
+                id="comment"
+                rows={4}
+                value={newReview.comment}
+                onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              Submit Review
+            </button>
+          </form>
+        )}
+      </SectionCard>
     </div>
   )
 }
