@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import { cn } from '../utils/cn'
@@ -8,7 +8,7 @@ import { getLocalePrefix, useLanguageLinks, useLocalePath, useTranslation } from
 const navigation = [
   { to: '/', labelKey: 'home' },
   { to: '/catalog', labelKey: 'catalog' },
-  { to: '/book-table', labelKey: 'bookTable' },
+  { to: '/book-table', labelKey: 'table' },
   { to: '/cart', labelKey: 'cart' },
   { to: '/about', labelKey: 'aboutUs' },
 ] as const
@@ -37,9 +37,13 @@ export function AppShell() {
       <header className="border-b border-white/70 bg-white/70 backdrop-blur">
         <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-6 py-5 lg:grid lg:grid-cols-[1fr_minmax(280px,420px)_1.45fr] lg:items-center">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">
+            <Link
+              to={toLocalePath('/')}
+              className="inline-block text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700 transition hover:text-cyan-900 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-4"
+              aria-label={t.appShell.navigation.home}
+            >
               {t.appShell.brandLabel}
-            </p>
+            </Link>
           </div>
           {!isHomePage ? (
             <form onSubmit={handleSearch} className="w-full lg:justify-self-center">

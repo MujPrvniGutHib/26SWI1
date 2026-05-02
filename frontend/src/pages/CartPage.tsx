@@ -31,14 +31,6 @@ export function CartPage() {
           >
             {t.common.backToCatalog}
           </Link>
-          {cartItems.length > 0 ? (
-            <Link
-              to={toLocalePath('/checkout')}
-              className="inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-            >
-              {t.cartPage.hero.continueToCheckout}
-            </Link>
-          ) : null}
         </div>
       </PageHero>
 
@@ -103,11 +95,17 @@ export function CartPage() {
                 </div>
               </div>
             ))}
-            <div className="mt-6 flex justify-end border-t border-slate-200 pt-4">
-              <div className="text-right">
-                <p className="text-sm text-slate-600">{t.common.total}:</p>
-                <p className="text-2xl font-semibold text-slate-950">{formatCurrency(total, t)}</p>
+            <div className="mt-6 flex flex-col gap-4 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-end">
+              <div className="text-right text-2xl font-semibold text-slate-950">
+                <span>{t.common.total}: </span>
+                <span>{formatCurrency(total, t)}</span>
               </div>
+              <Link
+                to={toLocalePath('/checkout')}
+                className="inline-flex justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              >
+                {t.cartPage.hero.continueToCheckout}
+              </Link>
             </div>
           </div>
         ) : (

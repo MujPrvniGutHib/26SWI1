@@ -51,16 +51,16 @@ export function CheckoutPage() {
     {
       label: t.checkoutPage.deliveryOptions.homeDelivery,
       address: checkoutDetails.address || t.checkoutPage.deliveryOptions.checkoutAddress,
-      price: 150,
+      price: 6,
     },
     {
       label: 'AlzaBox',
-      price: 69,
+      price: 2.76,
       address: 'AlzaBox Ostrava Centrum, Nádražní 42, 702 00 Ostrava',
     },
     {
       label: 'PPL',
-      price: 89,
+      price: 3.56,
       address: 'PPL Parcelshop, Masarykovo náměstí 18, 702 00 Ostrava',
     },
   ]

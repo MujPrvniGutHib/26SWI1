@@ -151,12 +151,12 @@ export function getOrderTimelineNote(order: OrderRecord, t: Translation) {
     .replace('{dayWord}', dayWord)
 }
 
-export function formatCurrency(amountCzk: number, t: Translation) {
+export function formatCurrency(amountEur: number, t: Translation) {
   if (t === translations.cz) {
-    return `${amountCzk} Kč`
+    return `${(amountEur * CZK_PER_EUR).toFixed(2)} Kč`
   }
 
-  return `€${(amountCzk / CZK_PER_EUR).toFixed(2)}`
+  return `€${amountEur.toFixed(2)}`
 }
 
 export function formatCurrencyText(value: string, t: Translation) {
@@ -167,7 +167,13 @@ export function formatCurrencyText(value: string, t: Translation) {
     return normalizedValue
   }
 
-  return formatCurrency(Number(match[1].replace(',', '.')), t)
+  const amountCzk = Number(match[1].replace(',', '.'))
+
+  if (t === translations.cz) {
+    return `${amountCzk.toFixed(2)} Kč`
+  }
+
+  return `€${(amountCzk / CZK_PER_EUR).toFixed(2)}`
 }
 
 export function useLanguageLinks() {

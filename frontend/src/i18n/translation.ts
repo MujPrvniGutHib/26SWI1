@@ -64,8 +64,8 @@ const en = {
   tablePage: {
     documentTitle: 'Book Table | SWI Frontend',
     hero: {
-      eyebrow: 'Book Table',
-      title: 'Sort and Search Books',
+      eyebrow: 'Book table',
+      title: 'Sort and search books',
       description: 'A sortable and searchable table of all the books in the store.',
     },
     searchPlaceholder: 'Search by title or author',
@@ -737,7 +737,7 @@ const cz = {
     signIn: 'přihlášení',
     subtotal: 'mezisoučet',
     telephone: 'telefon',
-    total: 'celkem',
+    total: 'Celkem',
   },
   appShell: {
     brandLabel: 'Najdi svojí knihu',
@@ -758,8 +758,8 @@ const cz = {
   tablePage: {
     documentTitle: 'Tabulka Knih | SWI Frontend',
     hero: {
-      eyebrow: 'Tabulka Knih',
-      title: 'Řadit a Hledat Knihy',
+      eyebrow: 'Tabulka knih',
+      title: 'Řadit a vyhledávat knihy',
       description: 'Řaditelná a prohledávatelná tabulka všech knih v obchodě.',
     },
     searchPlaceholder: 'Hledat podle názvu nebo autora',

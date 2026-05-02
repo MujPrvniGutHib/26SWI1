@@ -1,16 +1,11 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import {
-  getLocalizedCountry,
-  useLocalePath,
-  useTranslation,
-} from '../utils/locale'
+import { useLocalePath, useTranslation } from '../utils/locale'
 import { api } from '../utils/api'
-import type { OrderRecord } from '../data/orders'
 
 export function ProfilePage() {
   const t = useTranslation()
@@ -30,21 +25,6 @@ export function ProfilePage() {
   const [deleteError, setDeleteError] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState('')
-  const [orders, setOrders] = useState<OrderRecord[]>([])
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await api.get<OrderRecord[]>('/api/orders');
-        setOrders(response.data);
-      } catch (error) {
-        console.error('Failed to fetch orders', error);
-      }
-    };
-
-    fetchOrders();
-  }, []);
-
   const handleSignOut = () => {
     signOut()
     navigate(toLocalePath('/sign-in'))
