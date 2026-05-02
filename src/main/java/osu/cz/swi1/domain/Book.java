@@ -34,8 +34,6 @@ public class Book {
     private double originalPrice;
     @Column(columnDefinition = "integer default 0")
     private int discountPercent;
-    @Column(columnDefinition = "double precision default 0.0")
-    private double rating;
     
     @Column(length = 2000)
     private String coverUrl;

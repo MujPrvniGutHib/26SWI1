@@ -605,6 +605,12 @@ const en = {
         'Character-driven stories emphasizing psychological depth and complex themes in stylistic prose.',
     },
     {
+      slug: 'manga',
+      title: 'Manga',
+      description:
+        'Japanese comics with a unique style, often telling stories of fantasy, adventure, and romance.',
+    },
+    {
       slug: 'mystery',
       title: 'Mystery',
       description:
@@ -1291,6 +1297,12 @@ const cz = {
       title: 'Literární fikce',
       description:
         'Příběhy založené na postavách s důrazem na psychologickou hloubku a komplexní témata ve stylistické próze.',
+    },
+    {
+      slug: 'Manga',
+      title: 'Manga',
+      description:
+        'Japonské komiksy s unikátním stylem, často vyprávějící příběhy o fantasii, dobrodružství a romantice.',
     },
     {
       slug: 'Detektivky',

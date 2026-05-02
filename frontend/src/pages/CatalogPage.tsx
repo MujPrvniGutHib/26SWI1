@@ -146,6 +146,12 @@ const categories = [
     description:
       'Detailed accounts of a person’s life written by another author based on research.',
   },
+  {
+    title: 'Manga',
+    slug: 'manga',
+    description:
+        ' MANGO.',
+  },
 ]
 
 const authors: string[] = []

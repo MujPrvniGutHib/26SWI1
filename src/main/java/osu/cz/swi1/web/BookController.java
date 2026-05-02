@@ -2,6 +2,7 @@ package osu.cz.swi1.web;
 
 import osu.cz.swi1.domain.Book;
 import osu.cz.swi1.service.BookService;
+import osu.cz.swi1.web.dto.BookDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/books")
@@ -23,7 +25,7 @@ public class BookController {
     }
 
     @GetMapping
-    public List<Book> getAllBooks(
+    public List<BookDTO> getAllBooks(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "title") String sort,
             @RequestParam(defaultValue = "asc") String order
@@ -42,13 +44,15 @@ public class BookController {
             );
         };
 
-        return bookService.getAllBooks(spec, sortBy);
+        return bookService.getAllBooks(spec, sortBy).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable Long id) {
+    public ResponseEntity<BookDTO> getBookById(@PathVariable Long id) {
         return bookService.getBookById(id)
-                .map(ResponseEntity::ok)
+                .map(book -> ResponseEntity.ok(convertToDto(book)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -77,5 +81,24 @@ public class BookController {
                     return ResponseEntity.ok().<Void>build();
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    private BookDTO convertToDto(Book book) {
+        BookDTO bookDTO = new BookDTO();
+        bookDTO.setId(book.getId());
+        bookDTO.setTitle(book.getTitle());
+        bookDTO.setAuthor(book.getAuthor());
+        bookDTO.setPrice(book.getPrice());
+        bookDTO.setCategory(book.getCategory());
+        bookDTO.setAge(book.getAge());
+        bookDTO.setPages(book.getPages());
+        bookDTO.setFormat(book.getFormat());
+        bookDTO.setOriginalPrice(book.getOriginalPrice());
+        bookDTO.setDiscountPercent(book.getDiscountPercent());
+        bookDTO.setRating(bookService.getAverageRating(book.getId()));
+        bookDTO.setCoverUrl(book.getCoverUrl());
+        bookDTO.setDescription(book.getDescription());
+        bookDTO.setStock(book.getStock());
+        return bookDTO;
     }
 }

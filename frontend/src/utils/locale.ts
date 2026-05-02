@@ -29,7 +29,8 @@ export function useLocalePath() {
       return to
     }
 
-    return `${localePrefix}${to === '/' ? '' : to}` || '/'
+    const newPath = `${localePrefix}${to === '/' ? '' : to}` || '/'
+    return newPath.startsWith('/') ? newPath : `/${newPath}`
   }
 }
 
@@ -175,7 +176,7 @@ export function useLanguageLinks() {
   const pathWithSearch = `${unprefixedPath}${location.search}${location.hash}`
 
   return {
-    enPath: pathWithSearch,
-    czPath: `/cz${unprefixedPath === '/' ? '' : unprefixedPath}${location.search}${location.hash}`,
+    enPath: pathWithSearch.startsWith('/') ? pathWithSearch : `/${pathWithSearch}`,
+    czPath: `/cz${pathWithSearch === '/' ? '' : pathWithSearch}`,
   }
 }
