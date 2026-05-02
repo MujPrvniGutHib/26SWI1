@@ -1,3 +1,4 @@
+import { BookTable } from '../components/BookTable'
 import { PageHero } from '../components/PageHero'
 import { useTranslation } from '../utils/locale'
 
@@ -11,9 +12,7 @@ export function BookTablePage() {
         title={t.tablePage.hero.title}
         description={t.tablePage.hero.description}
       />
-      <div className="p-8 text-center">
-        <p>{t.tablePage.searchPlaceholder}</p>
-      </div>
+      <BookTable />
     </div>
   )
 }

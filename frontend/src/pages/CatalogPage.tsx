@@ -15,7 +15,6 @@ import { api } from '../utils/api'
 import type { ApiBook } from '../utils/api'
 import { cn } from '../utils/cn'
 
-type ViewMode = 'grid' | 'table'
 type CatalogView = 'genres' | 'all-books'
 
 const categories = [
@@ -164,19 +163,6 @@ function normalizeSearchText(value: string) {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
-function SortIcon({
-  field,
-  sortField,
-  sortOrder,
-}: {
-  field: string
-  sortField: string
-  sortOrder: 'asc' | 'desc'
-}) {
-  if (sortField !== field) return <span className="text-slate-300 ml-1">↕</span>
-  return <span className="text-cyan-600 ml-1">{sortOrder === 'asc' ? '↑' : '↓'}</span>
-}
-
 export function CatalogPage() {
   const t = useTranslation()
   useDocumentTitle(t.catalogPage.documentTitle)
@@ -194,7 +180,6 @@ export function CatalogPage() {
 
   const [books, setBooks] = useState<ApiBook[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
   const [age, setAge] = useState(0)
   const [price, setPrice] = useState(0)
@@ -205,38 +190,24 @@ export function CatalogPage() {
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>([])
   const [selectedFormats, setSelectedFormats] = useState<string[]>([])
 
-  const [sortField, setSortField] = useState('id')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
-
   const fetchData = useCallback(async () => {
     setIsLoading(true)
     try {
       const params = new URLSearchParams()
       if (searchQuery) params.append('search', searchQuery)
-      params.append('sort', sortField)
-      params.append('order', sortOrder)
 
       const response = await api.get<ApiBook[]>(`/books?${params.toString()}`)
       setBooks(response.data)
     } catch (error) {
-      console.error("Failed to fetch table data", error)
+      console.error("Failed to fetch books", error)
     } finally {
       setIsLoading(false)
     }
-  }, [searchQuery, sortField, sortOrder])
+  }, [searchQuery])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
-
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortOrder('asc')
-    }
-  }
 
   const toggleFormat = (format: string) => {
     setSelectedFormats((current) =>
@@ -341,32 +312,6 @@ export function CatalogPage() {
             All Books
           </button>
         </div>
-        {catalogView === 'all-books' && (
-          <div className="inline-flex rounded-full bg-slate-100 p-1">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={cn(
-                'rounded-full px-5 py-2.5 text-sm font-medium transition',
-                viewMode === 'grid'
-                  ? 'bg-slate-950 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-950',
-              )}
-            >
-              Grid
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              className={cn(
-                'rounded-full px-5 py-2.5 text-sm font-medium transition',
-                viewMode === 'table'
-                  ? 'bg-slate-950 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-950',
-              )}
-            >
-              Table
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="grid gap-8 items-start xl:grid-cols-[250px_minmax(0,1fr)_280px]">
@@ -499,7 +444,7 @@ export function CatalogPage() {
               ))}
             </div>
           </SectionCard>
-        ) : viewMode === 'grid' ? (
+        ) : (
           <div className="space-y-6">
             {filteredBooks.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -556,83 +501,6 @@ export function CatalogPage() {
                 <p className="mt-3 text-sm">{t.catalogPage.filteredResults.adjustFilters}</p>
               </div>
             )}
-          </div>
-        ) : (
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th
-                    onClick={() => handleSort('id')}
-                    className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
-                  >
-                    {t.tablePage.table.id} <SortIcon field="id" sortField={sortField} sortOrder={sortOrder} />
-                  </th>
-                  <th
-                    onClick={() => handleSort('title')}
-                    className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
-                  >
-                    {t.tablePage.table.title} <SortIcon field="title" sortField={sortField} sortOrder={sortOrder} />
-                  </th>
-                  <th
-                    onClick={() => handleSort('author')}
-                    className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
-                  >
-                    {t.tablePage.table.author} <SortIcon field="author" sortField={sortField} sortOrder={sortOrder} />
-                  </th>
-                  <th
-                    onClick={() => handleSort('category')}
-                    className="cursor-pointer px-4 py-3 text-left font-semibold text-slate-900 hover:bg-slate-100"
-                  >
-                    {t.tablePage.table.category} <SortIcon field="category" sortField={sortField} sortOrder={sortOrder} />
-                  </th>
-                  <th
-                    onClick={() => handleSort('pages')}
-                    className="cursor-pointer px-4 py-3 text-right font-semibold text-slate-900 hover:bg-slate-100"
-                  >
-                    {t.tablePage.table.pages} <SortIcon field="pages" sortField={sortField} sortOrder={sortOrder} />
-                  </th>
-                  <th
-                    onClick={() => handleSort('price')}
-                    className="cursor-pointer px-4 py-3 text-right font-semibold text-slate-900 hover:bg-slate-100"
-                  >
-                    {t.tablePage.table.price} <SortIcon field="price" sortField={sortField} sortOrder={sortOrder} />
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                      Loading...
-                    </td>
-                  </tr>
-                ) : filteredBooks.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                      No books found.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredBooks.map((book) => (
-                    <tr key={book.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-slate-600">{book.id}</td>
-                      <td className="px-4 py-3 font-medium text-cyan-700">
-                          <Link to={toLocalePath(`/books/${book.id}`)} className="hover:underline">
-                              {book.title}
-                          </Link>
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">{book.author}</td>
-                      <td className="px-4 py-3 text-slate-600">{book.category}</td>
-                      <td className="px-4 py-3 text-right text-slate-600">{book.pages}</td>
-                      <td className="px-4 py-3 text-right font-medium text-slate-900">
-                        {formatCurrency(book.price, t)}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
           </div>
         )}
 
