@@ -73,7 +73,12 @@ const categories = [
     description:
       'Character-driven stories emphasizing psychological depth and complex themes in stylistic prose.',
   },
-
+  {
+    title: 'Manga',
+    slug: 'manga',
+    description:
+      'Japanese comics with a unique style, often telling stories of fantasy, adventure, and romance.',
+  },
   {
     title: 'Mystery',
     slug: 'mystery',
@@ -145,12 +150,6 @@ const categories = [
     slug: 'biography',
     description:
       'Detailed accounts of a person’s life written by another author based on research.',
-  },
-  {
-    title: 'Manga',
-    slug: 'manga',
-    description:
-        ' MANGO.',
   },
 ]
 
@@ -263,6 +262,7 @@ export function CatalogPage() {
 
   const handleAddToCart = (book: ApiBook) => {
     addToCart({
+      id: book.id,
       title: book.title,
       author: book.author,
       category: book.category,

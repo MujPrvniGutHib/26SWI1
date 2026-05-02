@@ -7,6 +7,23 @@ export const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  const storedUser = window.localStorage.getItem('swi-auth-user');
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      if (user && user.token) {
+        config.headers.Authorization = `Bearer ${user.token}`;
+      }
+    } catch (e) {
+      // Ignore parse error
+    }
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 export type ApiBook = {
   id: number;
   title: string;

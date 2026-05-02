@@ -14,20 +14,25 @@ public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private String username;
+    private String fullName;
     private String email;
+    private String telephone;
+    private String address;
 
     @JsonIgnore
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String username, String email, String password,
+    public UserDetailsImpl(Long id, String fullName, String email, String password,
+                           String telephone, String address,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
-        this.username = username;
+        this.fullName = fullName;
         this.email = email;
         this.password = password;
+        this.telephone = telephone;
+        this.address = address;
         this.authorities = authorities;
     }
 
@@ -41,6 +46,8 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getTelephone(),
+                user.getAddress(),
                 authorities);
     }
 
@@ -57,6 +64,18 @@ public class UserDetailsImpl implements UserDetails {
         return email;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
     @Override
     public String getPassword() {
         return password;
@@ -64,7 +83,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email; // Return email as the Spring Security username identifier
     }
 
     @Override

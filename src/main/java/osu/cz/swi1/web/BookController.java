@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/books")
-@CrossOrigin(origins = "*") // Allows your frontend to communicate with this backend
+@CrossOrigin(origins = "http://localhost:5173")
 public class BookController {
 
     private final BookService bookService;

@@ -1,5 +1,6 @@
 package osu.cz.swi1.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,5 +22,6 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "book_id")
+    @JsonBackReference(value = "book-review")
     private Book book;
 }

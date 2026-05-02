@@ -4,9 +4,9 @@ import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
-import { addDays, getIsoDate, saveStoredOrder } from '../data/orders'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { formatCurrency, getLocalizedCategory, useLocalePath, useTranslation } from '../utils/locale'
+import { api } from '../utils/api'
 
 export function CheckoutPage() {
   const t = useTranslation()
@@ -89,52 +89,28 @@ export function CheckoutPage() {
   const primaryButtonClassName =
     'inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:hover:bg-slate-300'
 
-  const handleBuy = () => {
+  const handleBuy = async () => {
     if (!isCheckoutReady || isPurchaseSubmitted) {
       return
     }
 
     const deliveryDays = Math.floor(Math.random() * 7) + 1
-    const placedOnDate = new Date()
-    const deliveryDueDate = addDays(placedOnDate, deliveryDays)
     setIsPurchaseSubmitted(true)
 
     if (isSignedIn) {
-      const placedOn = placedOnDate.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
-      const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
-
-      saveStoredOrder({
-        id: `ORD-${Date.now()}`,
-        status: t.checkoutPage.order.preparing,
-        placedOn,
-        placedOnDate: getIsoDate(placedOnDate),
-        deliveryDueDate: getIsoDate(deliveryDueDate),
-        total: `${orderTotal} Kč`,
-        itemsLabel: `${itemCount} ${
-          itemCount === 1 ? t.checkoutPage.order.book : t.checkoutPage.order.books
-        }`,
-        deliveryCost: `${selectedDeliveryPrice} Kč`,
+      const orderData = {
+        items: cartItems.map(item => ({ bookId: item.book.id, quantity: item.quantity })),
+        totalPrice: orderTotal,
         deliveryMethod: deliveryOption,
-        paymentMethod: billingOption,
         shippingAddress: selectedDeliveryAddress,
         billingAddress: checkoutDetails.address,
-        timelineNote: t.checkoutPage.order.thanksTimeline
-          .replace('{days}', String(deliveryDays))
-          .replace(
-            '{dayWord}',
-            deliveryDays === 1 ? t.checkoutPage.order.day : t.checkoutPage.order.days,
-          ),
-        isActive: true,
-        items: cartItems.map((item) => ({
-          title: item.book.title,
-          quantity: item.quantity,
-          price: `${item.book.price * item.quantity} Kč`,
-        })),
-      })
+      };
+
+      try {
+        await api.post('/api/orders', orderData);
+      } catch (error) {
+        console.error('Failed to create order', error);
+      }
     }
 
     setPurchaseMessage(
@@ -175,7 +151,7 @@ export function CheckoutPage() {
                   key={item.book.title}
                   className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center"
                 >
-                  <Link to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)} className="shrink-0">
+                  <Link to={toLocalePath(`/books/${item.book.id}`)} className="shrink-0">
                     <img
                       src={item.book.coverUrl}
                       alt={`${item.book.title} ${t.catalogPage.bookCard.coverSuffix}`}
@@ -184,13 +160,13 @@ export function CheckoutPage() {
                   </Link>
                   <div className="min-w-0 flex-1">
                     <Link
-                      to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)}
+                      to={toLocalePath(`/books/${item.book.id}`)}
                       className="text-sm font-semibold uppercase tracking-wide text-cyan-700 hover:underline"
                     >
                       {getLocalizedCategory(item.book.category, t)}
                     </Link>
                     <Link
-                      to={toLocalePath(`/books/${encodeURIComponent(item.book.title)}`)}
+                      to={toLocalePath(`/books/${item.book.id}`)}
                       className="block text-lg font-semibold text-slate-950 hover:underline"
                     >
                       {item.book.title}

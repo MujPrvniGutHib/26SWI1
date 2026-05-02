@@ -6,6 +6,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { formatCurrency, getLocalizedCategory, useLocalePath, useTranslation } from '../utils/locale'
 
 type Book = {
+  id: number
   title: string
   author: string
   category: string
@@ -33,6 +34,7 @@ export function DiscountsPage() {
 
   const handleAddToCart = (book: (typeof books)[number]) => {
     addToCart({
+      id: book.id,
       title: book.title,
       author: book.author,
       category: book.category,

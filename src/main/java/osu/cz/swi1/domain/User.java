@@ -1,5 +1,6 @@
 package osu.cz.swi1.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,9 @@ public class User {
     private String password;
     private String email;
 
-    // M:N relationship
+    private String telephone;
+    private String address;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -33,7 +36,7 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    // 1:M relationship
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "user-order")
     private List<Order> orders;
 }

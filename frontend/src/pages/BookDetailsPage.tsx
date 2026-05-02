@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
@@ -35,25 +35,32 @@ export function BookDetailsPage() {
   const [error, setError] = useState<string | null>(null)
   const [newReview, setNewReview] = useState({ comment: '', rating: 0 })
 
-  useEffect(() => {
-    const fetchBookAndReviews = async () => {
-      if (!bookId) return
-      setIsLoading(true)
-      try {
-        const [bookResponse, reviewsResponse] = await Promise.all([
-          api.get<ApiBook>(`/books/${bookId}`),
-          api.get<Review[]>(`/api/reviews?bookId=${bookId}`),
-        ])
-        setBook(bookResponse.data)
-        setReviews(reviewsResponse.data)
-      } catch (err) {
-        setError('Failed to fetch book details.')
-      } finally {
-        setIsLoading(false)
-      }
+  const fetchBookAndReviews = useCallback(async () => {
+    if (!bookId) {
+      setError("Book ID is missing from URL.");
+      setIsLoading(false);
+      return;
     }
+    setIsLoading(true);
+    setError(null); // Clear previous errors
+    try {
+      const [bookResponse, reviewsResponse] = await Promise.all([
+        api.get<ApiBook>(`/books/${bookId}`),
+        api.get<Review[]>(`/books/${bookId}/reviews`),
+      ])
+      setBook(bookResponse.data)
+      setReviews(Array.isArray(reviewsResponse.data) ? reviewsResponse.data : [])
+    } catch (err: any) {
+      console.error("Error fetching book or reviews:", err);
+      setError(err.response?.data?.message || "Failed to fetch book details or reviews.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [bookId]);
+
+  useEffect(() => {
     fetchBookAndReviews()
-  }, [bookId])
+  }, [fetchBookAndReviews])
 
   const handleReviewSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -67,7 +74,7 @@ export function BookDetailsPage() {
     }
 
     try {
-      const response = await api.post<Review>('/api/reviews', review)
+      const response = await api.post<Review>(`/books/${bookId}/reviews`, review)
       setReviews([...reviews, response.data])
       setNewReview({ comment: '', rating: 0 })
     } catch (err) {
@@ -121,6 +128,7 @@ export function BookDetailsPage() {
               type="button"
               onClick={() => {
                 addToCart({
+                  id: book.id,
                   title: book.title,
                   author: book.author,
                   category: book.category,
@@ -220,7 +228,7 @@ export function BookDetailsPage() {
 
       <SectionCard eyebrow="Reviews" title="What our readers are saying">
         <div className="space-y-4">
-          {reviews.map((review) => (
+          {Array.isArray(reviews) && reviews.map((review) => (
             <div key={review.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center gap-2">
                 <p className="font-semibold">{review.author}</p>

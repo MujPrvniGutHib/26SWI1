@@ -1,13 +1,12 @@
 package osu.cz.swi1.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -23,7 +22,6 @@ public class Book {
     private String author;
     private double price;
     
-    // New fields added to match frontend requirements
     private String category;
     @Column(columnDefinition = "integer default 0")
     private int age;
@@ -44,4 +42,11 @@ public class Book {
     @Column(columnDefinition = "integer default 0")
     private int stock;
 
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "book-review")
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "book-orderItem")
+    private List<OrderItem> orderItems;
 }

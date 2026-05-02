@@ -18,6 +18,7 @@ const categoryMap: Record<string, string> = {
   horror: 'Horror',
   'humour-and-satire': 'Humour and satire',
   'literary-fiction': 'Literary fiction',
+  manga: 'Manga',
   mystery: 'Mystery',
   poetry: 'Poetry',
   plays: 'Plays',
@@ -83,6 +84,7 @@ export function CategoryBooksPage() {
 
   const handleAddToCart = (book: ApiBook) => {
     addToCart({
+      id: book.id,
       title: book.title,
       author: book.author,
       category: book.category,

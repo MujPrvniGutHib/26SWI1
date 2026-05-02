@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
 
 export type CartBook = {
+  id: number
   title: string
   author: string
   category: string
@@ -66,11 +67,11 @@ export function CartProvider({ children }: PropsWithChildren) {
       cartMessage,
       addToCart: (book: CartBook) => {
         setCartItems((current) => {
-          const existingItem = current.find((item) => item.book.title === book.title)
+          const existingItem = current.find((item) => item.book.id === book.id)
 
           if (existingItem) {
             return current.map((item) =>
-              item.book.title === book.title
+              item.book.id === book.id
                 ? {
                     ...item,
                     quantity: Math.min(item.quantity + 1, item.book.stock),

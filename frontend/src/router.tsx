@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
 import { AboutPage } from './pages/AboutPage'
 import { BookDetailsPage } from './pages/BookDetailsPage'
+import { BookTablePage } from './pages/BookTablePage'
 import { CartPage } from './pages/CartPage'
 import { CatalogPage } from './pages/CatalogPage'
 import { CategoryBooksPage } from './pages/CategoryBooksPage'
@@ -38,6 +39,10 @@ const appRoutes = [
   {
     path: 'books/:bookId',
     element: <BookDetailsPage />,
+  },
+  {
+    path: 'book-table',
+    element: <BookTablePage />,
   },
   {
     path: 'cart',

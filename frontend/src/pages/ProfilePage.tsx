@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PageHero } from '../components/PageHero'
 import { SectionCard } from '../components/SectionCard'
@@ -9,6 +9,8 @@ import {
   useLocalePath,
   useTranslation,
 } from '../utils/locale'
+import { api } from '../utils/api'
+import type { OrderRecord } from '../data/orders'
 
 export function ProfilePage() {
   const t = useTranslation()
@@ -28,6 +30,20 @@ export function ProfilePage() {
   const [deleteError, setDeleteError] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState('')
+  const [orders, setOrders] = useState<OrderRecord[]>([])
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await api.get<OrderRecord[]>('/api/orders');
+        setOrders(response.data);
+      } catch (error) {
+        console.error('Failed to fetch orders', error);
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   const handleSignOut = () => {
     signOut()
@@ -47,11 +63,21 @@ export function ProfilePage() {
     console.log('Changing password...')
   }
 
-  const handleProfileSave = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleProfileSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const updatedUser = { ...getUser(), ...profileDetails }
-    signIn(updatedUser)
-    setIsEditingDetails(false)
+    try {
+      await api.put('/api/users/profile', {
+        username: profileDetails.username,
+        email: profileDetails.email,
+        telephone: profileDetails.telephone,
+        address: profileDetails.address,
+      });
+      signIn(updatedUser)
+      setIsEditingDetails(false)
+    } catch (error) {
+      console.error('Failed to update profile', error);
+    }
   }
 
   return (
