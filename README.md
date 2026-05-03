@@ -64,8 +64,6 @@ flowchart TD
 
 # Use Case diagram
 
-# Use Case Diagram
-
 ```mermaid
 flowchart LR
     Guest(["Guest"])
