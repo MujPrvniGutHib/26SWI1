@@ -1,3 +1,95 @@
+# Dokumentace projektu „Knihkupectví“
+
+**Název projektu:** Online knihkupectví  
+**Předmět:** SWI1  
+**Rok:** 2026
+
+
+## O čem je tento projekt
+
+Jedná se o online knihkupectví, kde si uživatelé mohou prohlížet knihy, přidávat je do košíku a nakupovat je. Aplikace má frontend vytvořený v Reactu a backend v Javě Spring Boot. Data jsou uložena v databázi PostgreSQL.
+
+
+## Použité technologie
+**Frontend**
+- React 18 s TypeScriptem
+- Vite (pro spouštění a sestavování aplikace)
+- React Router (pro navigaci mezi stránkami)
+**Backend**
+- Java se Spring Bootem
+- Spring Security s JWT pro přihlášení
+- Spring Data JPA pro přístup k databázi
+**Databáze**
+- PostgreSQL
+
+## Jak spustit projekt
+1. Spusťte PostgreSQL a ujistěte se, že existuje databáze s názvem `postgres`
+2. Spusťte backend Spring Boot (spouští se na portu 8080)
+3. Spusťte frontend pomocí `npm run dev` (spouští se na portu 5173)
+4. Otevřete v prohlížeči `http://localhost:5173`
+
+
+## Co aplikace umí
+
+**Host (není přihlášen)**
+- Procházet všechny knihy
+- Vyhledávat knihy podle názvu nebo autora
+- Filtrovat knihy podle kategorie
+- Zobrazit stránku s podrobnostmi o knize včetně popisu a recenzí
+- Zaregistrovat nový účet
+- Přihlásit se
+
+**Registrovaný uživatel**
+- Vše, co může dělat host
+- Přidat knihy do košíku
+- Zadat objednávku (zadat adresu, vybrat způsob doručení)
+- Zobrazit historii objednávek
+- Napsat recenzi na knihu
+- Upravit profil (jméno, telefon, adresa)
+
+**Správce**
+- Přidávat nové knihy
+- Upravovat existující knihy
+- Mazat knihy
+
+
+## Struktura projektu
+
+Backend je rozdělen do několika balíčků:
+
+- `config` - spouští se při startu aplikace, naplní databázi výchozími daty
+- `domain` – hlavní datové třídy jako Book, User, Order, Review
+- `repository` – slouží ke čtení a zápisu dat do databáze
+- `service` – obchodní logika (vytváření objednávek, získávání knih atd.)
+- `security` – zpracovává přihlášení, JWT tokeny a řízení přístupu
+- `web` – řadiče REST API, které volá frontend
+
+Frontend je strukturován kolem stránek (HomePage, CatalogPage, CartPage, CheckoutPage, ProfilePage) a dvou globálních kontextů – jednoho pro přihlášeného uživatele a druhého pro košík.
+
+## Databáze
+
+Databáze obsahuje tyto hlavní tabulky:
+
+| Tabulka | Co obsahuje |
+|-------|---------------|
+| users | registrovaní uživatelé |
+| roles | role uživatelů (ROLE_USER, ROLE_ADMIN) |
+| book | všechny knihy v obchodě |
+| orders | objednávky zadané uživateli |
+| order_items | jednotlivé knihy v rámci objednávky |
+| review | recenze knih napsané uživateli |
+
+
+## Zabezpečení
+
+Přihlášení funguje pomocí JWT tokenů. Když se uživatel přihlásí, obdrží od serveru token. Frontend tento token uloží do localStorage a odesílá jej s každým požadavkem v hlavičce `Authorization`. Backend kontroluje token při každém požadavku a pokud není platný, je požadavek odmítnut s chybou 401.
+
+Hesla nejsou nikdy ukládána jako prostý text, jsou hašována pomocí BCrypt.
+
+
+
+
+
 # SWOT ANALÝZA
 
 ## Silné stránky
